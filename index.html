@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE IMPOSSIBLE IQ TEST</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+        #quiz-box {
+            border: 5px solid #0f0;
+            padding: 40px;
+            background: #111;
+            box-shadow: 0 0 20px #0f0;
+            width: 80%;
+            max-width: 600px;
+        }
+        .btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px;
+            border: none;
+            text-transform: uppercase;
+        }
+        #correct-btn {
+            background-color: #00ff00;
+            color: black;
+            position: absolute;
+            transition: 0.1s;
+        }
+        #wrong-btn {
+            background-color: #ff0000;
+            color: white;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: yellow;
+        }
+        h1 { font-size: 2rem; text-shadow: 2px 2px #ff0000; }
+    </style>
+</head>
+<body>
+
+<audio id="buzzer" src="https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3"></audio>
+<audio id="success" src="https://www.myinstants.com/media/sounds/vine-boom.mp3"></audio>
+
+<div id="quiz-box">
+    <h2 id="q-num">Question 1/20</h2>
+    <h1 id="question-text">Are you currently breathing?</h1>
+    
+    <button id="wrong-btn" class="btn" onclick="playBuzzer()">YES</button>
+    <button id="correct-btn" class="btn" onmouseover="teleport()" onclick="win()">NO</button>
+
+    <div id="status">SCORE: 0% | RANK: FOOL</div>
+</div>
+
+<script>
+    const questions = [
+        "Is water wet?",
+        "Do you have a brain?",
+        "Is 2 + 2 = 5?",
+        "Are you a robot?",
+        "Is the sky green?",
+        "Can you see this?",
+        "Do you like being trolled?",
+        "Is the Earth a cube?",
+        "Are you smart?",
+        "Do cats bark?",
+        "Is fire cold?",
+        "Are you clicking the red button?",
+        "Is this a quiz?",
+        "Are you failing?",
+        "Should you give up?",
+        "Is Pineapple on pizza okay?",
+        "Does 10 + 10 = 21?",
+        "Are you still trying?",
+        "Is this the last question?",
+        "ARE YOU SURE?"
+    ];
+
+    let currentIdx = 0;
+    const buzzer = document.getElementById('buzzer');
+    const boom = document.getElementById('success');
+    const qText = document.getElementById('question-text');
+    const qNum = document.getElementById('q-num');
+    const correctBtn = document.getElementById('correct-btn');
+
+    function teleport() {
+        const x = Math.random() * (window.innerWidth - 150);
+        const y = Math.random() * (window.innerHeight - 100);
+        correctBtn.style.left = x + 'px';
+        correctBtn.style.top = y + 'px';
+    }
+
+    function playBuzzer() {
+        buzzer.currentTime = 0;
+        buzzer.play();
+        alert("INCORRECT! How could you be so wrong?");
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            qNum.innerText = `Question ${currentIdx + 1}/20`;
+            qText.innerText = questions[currentIdx];
+            // Swap button meanings randomly to confuse them further
+            if (Math.random() > 0.5) {
+                document.getElementById('wrong-btn').innerText = "FALSE";
+                correctBtn.innerText = "TRUE";
+            } else {
+                document.getElementById('wrong-btn').innerText = "YES";
+                correctBtn.innerText = "NO";
+            }
+        } else {
+            document.getElementById('quiz-box').innerHTML = `
+                <h1>TEST COMPLETE</h1>
+                <p style="color:red; font-size: 30px;">RESULT: ABSOLUTE FAILURE</p>
+                <p>You got 0/20 correct. Please return your brain to the nearest lost and found.</p>
+                <button onclick="location.reload()" class="btn" style="background:yellow">RETRY (IF YOU DARE)</button>
+            `;
+        }
+    }
+
+    function win() {
+        // This should be nearly impossible to trigger due to teleport()
+        boom.play();
+        alert("Impossible. You cheated.");
+        nextQuestion();
+    }
+</script>
+
+</body>
+</html>
