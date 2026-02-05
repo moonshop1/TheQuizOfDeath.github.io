@@ -1,148 +1,659 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE IMPOSSIBLE IQ TEST</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #0f0;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            text-align: center;
-        }
-        #quiz-box {
-            border: 5px solid #0f0;
-            padding: 40px;
-            background: #111;
-            box-shadow: 0 0 20px #0f0;
-            width: 80%;
-            max-width: 600px;
-        }
-        .btn {
-            padding: 15px 30px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 20px;
-            border: none;
-            text-transform: uppercase;
-        }
-        #correct-btn {
-            background-color: #00ff00;
-            color: black;
-            position: absolute;
-            transition: 0.1s;
-        }
-        #wrong-btn {
-            background-color: #ff0000;
-            color: white;
-        }
-        #status {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            color: yellow;
-        }
-        h1 { font-size: 2rem; text-shadow: 2px 2px #ff0000; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYSTEM_OVERRIDE // USER_INTELLIGENCE_PROTOCOL_v9.2</title>
+<style>
+    /* ================================================================
+       CORE STYLESHEET - SYSTEM LEVEL 5 CLEARANCE REQUIRED
+       ================================================================
+    */
+    :root {
+        --terminal-bg: #000000;
+        --terminal-text: #00ff41;
+        --error-color: #ff0000;
+        --ui-font: 'Courier New', Courier, monospace;
+        --glitch-offset: 2px;
+    }
+
+    * {
+        box-sizing: border-box;
+        user-select: none; /* TROLL: Can't highlight text */
+        cursor: crosshair;
+    }
+
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background-color: var(--terminal-bg);
+        color: var(--terminal-text);
+        font-family: var(--ui-font);
+        overflow: hidden; /* TROLL: No scrolling allowed */
+    }
+
+    /* BACKGROUND MATRIX EFFECT LAYER */
+    #matrix-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        opacity: 0.15;
+    }
+
+    /* MAIN INTERFACE CONTAINER */
+    #interface-layer {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        border: 20px solid #111;
+    }
+
+    /* CRT MONITOR SCANLINE EFFECT */
+    .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to bottom,
+            rgba(255,255,255,0),
+            rgba(255,255,255,0) 50%,
+            rgba(0,0,0,0.2) 50%,
+            rgba(0,0,0,0.2)
+        );
+        background-size: 100% 4px;
+        z-index: 999;
+        pointer-events: none;
+    }
+
+    /* UI ELEMENTS */
+    .terminal-box {
+        background: rgba(0, 20, 0, 0.9);
+        border: 2px solid var(--terminal-text);
+        padding: 40px;
+        width: 600px;
+        max-width: 90%;
+        box-shadow: 0 0 30px var(--terminal-text);
+        text-align: center;
+        position: relative;
+        transition: transform 0.1s;
+    }
+
+    h1 {
+        text-transform: uppercase;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px var(--error-color);
+        animation: glitch-text 1s infinite linear alternate-reverse;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+        line-height: 1.5;
+        border-bottom: 1px dashed var(--terminal-text);
+        padding-bottom: 20px;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        height: 80px; /* Space for moving buttons */
+        position: relative;
+    }
+
+    button {
+        background: transparent;
+        border: 2px solid var(--terminal-text);
+        color: var(--terminal-text);
+        font-family: var(--ui-font);
+        font-size: 1.5rem;
+        padding: 15px 40px;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-weight: bold;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    button:hover {
+        background: var(--terminal-text);
+        color: black;
+        box-shadow: 0 0 15px var(--terminal-text);
+    }
+
+    button.troll-mode {
+        position: absolute; /* Allows teleportation */
+    }
+
+    /* LOADING BAR STYLES */
+    #loader-container {
+        display: none;
+        width: 100%;
+        margin-top: 20px;
+    }
+    #loader-bar {
+        width: 0%;
+        height: 20px;
+        background-color: var(--error-color);
+        transition: width 0.5s;
+    }
+
+    /* GLITCH ANIMATIONS */
+    @keyframes glitch-text {
+        0% { text-shadow: -2px 0 red, 2px 0 blue; transform: skew(0deg); }
+        20% { text-shadow: -2px 0 red, 2px 0 blue; transform: skew(10deg); }
+        40% { text-shadow: -2px 0 red, 2px 0 blue; transform: skew(-5deg); }
+        60% { text-shadow: -2px 0 red, 2px 0 blue; transform: skew(0deg); }
+        80% { text-shadow: -2px 0 red, 2px 0 blue; transform: skew(5deg); }
+        100% { text-shadow: -2px 0 red, 2px 0 blue; transform: skew(0deg); }
+    }
+
+    .shake {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-2px, 0, 0); }
+        20%, 80% { transform: translate3d(4px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+        40%, 60% { transform: translate3d(8px, 0, 0); }
+    }
+
+    /* BLUE SCREEN OF DEATH OVERLAY */
+    #bsod {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: #0000AA;
+        color: white;
+        z-index: 10000;
+        padding: 50px;
+        font-family: 'Lucida Console', monospace;
+        font-size: 20px;
+        text-align: left;
+    }
+
+</style>
 </head>
 <body>
 
-<audio id="buzzer" src="https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3"></audio>
-<audio id="success" src="https://www.myinstants.com/media/sounds/vine-boom.mp3"></audio>
+<div id="audio-engine"></div>
 
-<div id="quiz-box">
-    <h2 id="q-num">Question 1/20</h2>
-    <h1 id="question-text">Are you currently breathing?</h1>
-    
-    <button id="wrong-btn" class="btn" onclick="playBuzzer()">YES</button>
-    <button id="correct-btn" class="btn" onmouseover="teleport()" onclick="win()">NO</button>
+<canvas id="matrix-canvas"></canvas>
 
-    <div id="status">SCORE: 0% | RANK: FOOL</div>
+<div class="scanlines"></div>
+
+<div id="interface-layer">
+    <div class="terminal-box" id="game-box">
+        <div id="header-display">
+            <h1>>> INTELLIGENCE_TEST_INIT</h1>
+            <p id="system-status">MEMORY: LEAKING | CPU: OVERHEATING | IQ: NOT FOUND</p>
+        </div>
+        
+        <div id="quiz-content">
+            <h2 id="question-text">LOADING SYSTEM RESOURCES...</h2>
+            
+            <div class="btn-container" id="buttons-area">
+                <button id="btn-start" onclick="initGame()">[ START SIMULATION ]</button>
+            </div>
+            
+            <div id="loader-container">
+                <p>DOWNLOADING VIRUS.EXE...</p>
+                <div style="border: 1px solid red; width: 100%; height: 24px;">
+                    <div id="loader-bar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 0.8rem; color: #555;">
+            SESSION_ID: <span id="session-id">NULL</span>
+        </div>
+    </div>
+</div>
+
+<div id="bsod" onclick="location.reload()">
+    <p>A problem has been detected and windows has been shut down to prevent damage to your computer.</p>
+    <p>THE_USER_IS_TOO_GULLIBLE_ERROR</p>
+    <p>If this is the first time you've seen this stop error screen, restart your computer. If this screen appears again, follow these steps:</p>
+    <p>1. Admit you were trolled.</p>
+    <p>2. Go touch grass.</p>
+    <br><br>
+    <p>Technical Information:</p>
+    <p>*** STOP: 0x00000000 (0xF00L, 0xN00B, 0xFA1L, 0xL0L)</p>
+    <br><br>
+    <p>Press any key to continue (It won't work)...</p>
 </div>
 
 <script>
-    const questions = [
-        "Is water wet?",
-        "Do you have a brain?",
-        "Is 2 + 2 = 5?",
-        "Are you a robot?",
-        "Is the sky green?",
-        "Can you see this?",
-        "Do you like being trolled?",
-        "Is the Earth a cube?",
-        "Are you smart?",
-        "Do cats bark?",
-        "Is fire cold?",
-        "Are you clicking the red button?",
-        "Is this a quiz?",
-        "Are you failing?",
-        "Should you give up?",
-        "Is Pineapple on pizza okay?",
-        "Does 10 + 10 = 21?",
-        "Are you still trying?",
-        "Is this the last question?",
-        "ARE YOU SURE?"
-    ];
+    /*
+        ================================================================
+        LOGIC CORE - SPAGHETTI CODE OPTIMIZED
+        ================================================================
+    */
 
-    let currentIdx = 0;
-    const buzzer = document.getElementById('buzzer');
-    const boom = document.getElementById('success');
-    const qText = document.getElementById('question-text');
-    const qNum = document.getElementById('q-num');
-    const correctBtn = document.getElementById('correct-btn');
+    // --- VARIABLES ---
+    let currentLevel = 0;
+    let fails = 0;
+    const sessionID = Math.floor(Math.random() * 999999999).toString(16).toUpperCase();
+    document.getElementById('session-id').innerText = sessionID;
 
-    function teleport() {
-        const x = Math.random() * (window.innerWidth - 150);
-        const y = Math.random() * (window.innerHeight - 100);
-        correctBtn.style.left = x + 'px';
-        correctBtn.style.top = y + 'px';
-    }
+    // --- AUDIO ENGINE (Web Audio API) ---
+    // We generate sounds programmatically to avoid external assets
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
 
-    function playBuzzer() {
-        buzzer.currentTime = 0;
-        buzzer.play();
-        alert("INCORRECT! How could you be so wrong?");
-        nextQuestion();
-    }
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
 
-    function nextQuestion() {
-        currentIdx++;
-        if (currentIdx < questions.length) {
-            qNum.innerText = `Question ${currentIdx + 1}/20`;
-            qText.innerText = questions[currentIdx];
-            // Swap button meanings randomly to confuse them further
-            if (Math.random() > 0.5) {
-                document.getElementById('wrong-btn').innerText = "FALSE";
-                correctBtn.innerText = "TRUE";
-            } else {
-                document.getElementById('wrong-btn').innerText = "YES";
-                correctBtn.innerText = "NO";
-            }
-        } else {
-            document.getElementById('quiz-box').innerHTML = `
-                <h1>TEST COMPLETE</h1>
-                <p style="color:red; font-size: 30px;">RESULT: ABSOLUTE FAILURE</p>
-                <p>You got 0/20 correct. Please return your brain to the nearest lost and found.</p>
-                <button onclick="location.reload()" class="btn" style="background:yellow">RETRY (IF YOU DARE)</button>
-            `;
+        const now = audioCtx.currentTime;
+
+        if (type === 'hover') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+            gainNode.gain.setValueAtTime(0.05, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.linearRampToValueAtTime(50, now + 0.5);
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } else if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.setValueAtTime(1200, now + 0.1);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } else if (type === 'glitch') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(Math.random() * 1000, now);
+            gainNode.gain.setValueAtTime(0.1, now);
+            osc.start(now);
+            osc.stop(now + 0.05);
         }
     }
 
-    function win() {
-        // This should be nearly impossible to trigger due to teleport()
-        boom.play();
-        alert("Impossible. You cheated.");
-        nextQuestion();
-    }
-</script>
+    // --- MATRIX RAIN EFFECT ---
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const alphabet = katakana + latin;
+    const fontSize = 16;
+    const columns = canvas.width/fontSize;
+    const rainDrops = [];
+    for(let x = 0; x < columns; x++) rainDrops[x] = 1;
 
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0F0';
+        ctx.font = fontSize + 'px monospace';
+        for(let i = 0; i < rainDrops.length; i++) {
+            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+            ctx.fillText(text, i*fontSize, rainDrops[i]*fontSize);
+            if(rainDrops[i]*fontSize > canvas.height && Math.random() > 0.975) rainDrops[i] = 0;
+            rainDrops[i]++;
+        }
+    }
+    setInterval(drawMatrix, 30);
+
+    // --- THE QUESTIONS (20 LEVELS OF PAIN) ---
+    const questions = [
+        {
+            q: "LEVEL 1: Are you mentally prepared?",
+            t: "simple",
+            y: "No", n: "Yes", // Swapped text labels visually
+            correct: "n" // The logic looks for the ID, not the text
+        },
+        {
+            q: "LEVEL 2: Is the sky Green?",
+            t: "simple",
+            y: "Yes", n: "No",
+            correct: "n"
+        },
+        {
+            q: "LEVEL 3: Click the answer that is TRUE.",
+            t: "hover_swap",
+            y: "I am smart", n: "I am dumb",
+            correct: "y"
+        },
+        {
+            q: "LEVEL 4: Select '4'",
+            t: "math_troll",
+            y: "2 + 2", n: "4",
+            correct: "y" // Troll: 2+2 is the calculation, "4" is just text.
+        },
+        {
+            q: "LEVEL 5: Do NOT click the blue button.",
+            t: "color_trick",
+            y: "Blue", n: "Red",
+            correct: "y" // They are styled via CSS overriding typical colors
+        },
+        {
+            q: "LEVEL 6: Are you a robot?",
+            t: "runaway",
+            y: "No", n: "Yes",
+            correct: "y" // The "No" button will run away
+        },
+        {
+            q: "LEVEL 7: Touch the button to proceed.",
+            t: "tiny",
+            y: "O", n: "O",
+            correct: "y"
+        },
+        {
+            q: "LEVEL 8: What goes up but never comes down?",
+            t: "riddle",
+            y: "My Ping", n: "Gravity",
+            correct: "y"
+        },
+        {
+            q: "LEVEL 9: Quick! Click the LEFT button!",
+            t: "swap_pos",
+            y: "Right", n: "Left", // Text says Right/Left, physical position swaps
+            correct: "n" // Correct answer is the one labeled "Left" (which is 'n'), regardless of position
+        },
+        {
+            q: "LEVEL 10: Is this the halfway point?",
+            t: "simple",
+            y: "Yes", n: "No",
+            correct: "y"
+        },
+        {
+            q: "LEVEL 11: Wait for it...",
+            t: "patience",
+            y: "Click Me", n: "Don't Click",
+            correct: "y" // Button is disabled for 3 seconds
+        },
+        {
+            q: "LEVEL 12: Do you like ads?",
+            t: "popups",
+            y: "LOVE THEM", n: "Hate them",
+            correct: "n"
+        },
+        {
+            q: "LEVEL 13: Find the invisible button.",
+            t: "invisible",
+            y: "Here", n: "There",
+            correct: "n"
+        },
+        {
+            q: "LEVEL 14: 10 / 0.5 = ?",
+            t: "math_hard",
+            y: "5", n: "20",
+            correct: "n"
+        },
+        {
+            q: "LEVEL 15: Don't panic.",
+            t: "shake_screen",
+            y: "PANIC", n: "OK",
+            correct: "n"
+        },
+        {
+            q: "LEVEL 16: Choose the 'Right' answer.",
+            t: "literal",
+            y: "Left", n: "Right",
+            correct: "n" // Literally the button labeled Right
+        },
+        {
+            q: "LEVEL 17: Are you tired yet?",
+            t: "simple",
+            y: "Yes", n: "No",
+            correct: "n" // A true gamer is never tired
+        },
+        {
+            q: "LEVEL 18: Click 'Yes' if you want to win $1,000,000",
+            t: "runaway_extreme",
+            y: "Yes", n: "No",
+            correct: "n" // Yes is impossible to click
+        },
+        {
+            q: "LEVEL 19: Confirm deletion of System32?",
+            t: "scary",
+            y: "Confirm", n: "Cancel",
+            correct: "y" // Must confirm to proceed
+        },
+        {
+            q: "LEVEL 20: FINAL BOSS. Is this a good website?",
+            t: "impossible",
+            y: "Yes", n: "No",
+            correct: "y"
+        }
+    ];
+
+    // --- GAME ENGINE ---
+
+    function initGame() {
+        playSound('correct');
+        const header = document.getElementById('header-display');
+        header.innerHTML = "<h1>INITIALIZING TROLL PROTOCOLS...</h1>";
+        
+        // Fake Loading Bar
+        document.getElementById('buttons-area').style.display = 'none';
+        document.getElementById('loader-container').style.display = 'block';
+        
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                document.getElementById('loader-container').style.display = 'none';
+                document.getElementById('buttons-area').style.display = 'flex';
+                startGameLoop();
+            } else {
+                width++;
+                document.getElementById('loader-bar').style.width = width + '%';
+                // Random glitches
+                if(Math.random() > 0.8) playSound('glitch');
+            }
+        }, 30);
+    }
+
+    function startGameLoop() {
+        if(currentLevel >= questions.length) {
+            triggerWin();
+            return;
+        }
+
+        const q = questions[currentLevel];
+        const container = document.getElementById('buttons-area');
+        const qText = document.getElementById('question-text');
+        
+        // Reset container
+        container.innerHTML = '';
+        qText.innerText = q.q;
+        qText.style.color = "var(--terminal-text)";
+
+        // Create Buttons
+        const btnY = document.createElement('button');
+        const btnN = document.createElement('button');
+        
+        btnY.innerText = q.y;
+        btnN.innerText = q.n;
+        
+        btnY.id = 'btn-y';
+        btnN.id = 'btn-n';
+
+        // Apply Logic Types
+        applyTrollLogic(q.t, btnY, btnN, q.correct);
+
+        // Append based on logic (sometimes we swap order)
+        if(Math.random() > 0.5) {
+            container.appendChild(btnN);
+            container.appendChild(btnY);
+        } else {
+            container.appendChild(btnY);
+            container.appendChild(btnN);
+        }
+    }
+
+    function applyTrollLogic(type, btnY, btnN, correctKey) {
+        const correctBtn = correctKey === 'y' ? btnY : btnN;
+        const wrongBtn = correctKey === 'y' ? btnN : btnY;
+
+        // STANDARD CLICK HANDLERS
+        btnY.onclick = () => checkAnswer('y', correctKey);
+        btnN.onclick = () => checkAnswer('n', correctKey);
+
+        // HOVER SOUNDS
+        btnY.onmouseenter = () => playSound('hover');
+        btnN.onmouseenter = () => playSound('hover');
+
+        // SPECIAL LOGICS
+        if(type === 'hover_swap') {
+            btnY.onmouseenter = () => {
+                const temp = btnY.innerText;
+                btnY.innerText = btnN.innerText;
+                btnN.innerText = temp;
+                playSound('glitch');
+            };
+        }
+
+        if(type === 'runaway') {
+             // The WRONG button stays put, the CORRECT one runs away (making it hard)
+             // wait, usually trolls make the WRONG one run away so you can't click "No".
+             // Let's make the "No" button run away if "No" is wrong?
+             // Actually, let's make the "Wrong" button run away so they HAVE to click correct?
+             // No, let's make the CORRECT button run away to be annoying.
+             correctBtn.onmouseover = () => {
+                 moveButtonRandomly(correctBtn);
+             };
+        }
+        
+        if(type === 'runaway_extreme') {
+            // The correct answer is NO. The YES button runs away.
+            // Wait, logic says correct is N. So Y is wrong. 
+            // Make Y run away.
+            wrongBtn.onmouseover = () => {
+                moveButtonRandomly(wrongBtn);
+            }
+        }
+
+        if(type === 'tiny') {
+            correctBtn.style.transform = "scale(0.2)";
+        }
+
+        if(type === 'invisible') {
+            correctBtn.style.opacity = "0.05"; // Nearly invisible
+        }
+
+        if(type === 'patience') {
+            correctBtn.disabled = true;
+            correctBtn.style.opacity = "0.5";
+            let timer = 3;
+            correctBtn.innerText = "Wait (3)";
+            const countdown = setInterval(() => {
+                timer--;
+                correctBtn.innerText = `Wait (${timer})`;
+                if(timer <= 0) {
+                    clearInterval(countdown);
+                    correctBtn.innerText = "NOW!";
+                    correctBtn.disabled = false;
+                    correctBtn.style.opacity = "1";
+                }
+            }, 1000);
+        }
+
+        if(type === 'shake_screen') {
+            document.body.classList.add('shake');
+            setTimeout(() => document.body.classList.remove('shake'), 1000);
+        }
+        
+        if(type === 'color_trick') {
+            btnY.style.borderColor = "blue";
+            btnY.style.color = "blue";
+            btnN.style.borderColor = "red";
+            btnN.style.color = "red";
+        }
+    }
+
+    function moveButtonRandomly(btn) {
+        playSound('glitch');
+        btn.style.position = 'fixed';
+        btn.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+        btn.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+    }
+
+    function checkAnswer(selected, correct) {
+        if(selected === correct) {
+            playSound('correct');
+            currentLevel++;
+            startGameLoop();
+        } else {
+            playSound('wrong');
+            fails++;
+            triggerFail();
+        }
+    }
+
+    function triggerFail() {
+        const box = document.getElementById('game-box');
+        box.classList.add('shake');
+        document.getElementById('question-text').innerText = "WRONG ANSWER DETECTED. DELETING SYSTEM32...";
+        document.getElementById('question-text').style.color = "red";
+        
+        // Flash red
+        document.body.style.backgroundColor = "#500";
+        setTimeout(() => {
+            document.body.style.backgroundColor = "black";
+            box.classList.remove('shake');
+            // If they fail too much, BSOD
+            if(fails > 2) {
+                document.getElementById('bsod').style.display = 'block';
+                playSound('wrong');
+            } else {
+                // Restart level
+                setTimeout(() => {
+                    startGameLoop(); // Restart level prompt
+                }, 1000);
+            }
+        }, 500);
+    }
+
+    function triggerWin() {
+        document.getElementById('game-box').innerHTML = `
+            <h1 style="color: #0f0; font-size: 3rem;">TASK FAILED SUCCESSFULLY</h1>
+            <p>You have wasted approximately 2 minutes of your life.</p>
+            <p>SCORE: -${Math.floor(Math.random() * 10000)} POINTS</p>
+            <button onclick="location.reload()">PLAY AGAIN</button>
+        `;
+        playSound('correct');
+        setInterval(() => playSound('correct'), 500); // Annoying loop
+    }
+
+    // --- TROLL: DISABLE RIGHT CLICK ---
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // --- TROLL: PREVENT LEAVING EASILY ---
+    window.onbeforeunload = function() {
+        return "ARE YOU SURE YOU WANT TO QUIT? YOUR IQ SCORE WILL BE RESET TO 0.";
+    };
+
+</script>
 </body>
 </html>
