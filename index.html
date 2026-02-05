@@ -1,562 +1,758 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WARNING: CRITICAL SYSTEM ERROR // DO NOT CLOSE</title>
-    <style>
-        /* =========================================
-           SECTOR 1: CORE VISUALS & ANIMATIONS
-           ========================================= */
-        :root {
-            --term-green: #0f0;
-            --term-red: #ff003c;
-            --term-bg: #050505;
-            --font-main: 'Courier New', Courier, monospace;
-        }
-        
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            cursor: crosshair;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCTFD // ARCHIVE_3105 // ACCESS_DENIED</title>
+<style>
+    /* ==========================================================================
+       SECTION 1: CORE VISUALS & RESET
+       ========================================================================== */
+    :root {
+        --bg-color: #050505;
+        --primary: #00ff41;     /* Classic Matrix Green */
+        --secondary: #003b00;   /* Dark Green */
+        --alert: #ff0000;       /* Critical Red */
+        --warning: #ffcc00;     /* Amber */
+        --dim: #444;
+        --font-stack: 'Courier New', Courier, monospace;
+        --scan-line-color: rgba(0, 255, 65, 0.05);
+        --glass-reflection: rgba(255, 255, 255, 0.02);
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--term-bg);
-            color: var(--term-green);
-            font-family: var(--font-main);
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+    *, *::before, *::after {
+        box-sizing: border-box;
+        user-select: none;
+        cursor: crosshair; /* Tactical Cursor */
+    }
 
-        /* CRT SCANLINE & CURVATURE */
-        body::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 999;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--bg-color);
+        color: var(--primary);
+        font-family: var(--font-stack);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
 
-        /* BACKGROUND MATRIX CANVAS */
-        #matrix-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            z-index: 0;
-            opacity: 0.15;
-        }
+    /* ==========================================================================
+       SECTION 2: CRT & SCREEN EFFECTS
+       ========================================================================== */
+    #crt-layer {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+        );
+        background-size: 100% 4px;
+        z-index: 999;
+        pointer-events: none;
+        animation: scanlines 0.2s linear infinite;
+    }
 
-        /* MAIN TERMINAL CONTAINER */
-        #main-terminal {
-            width: 900px;
-            max-width: 95%;
-            height: 650px;
-            border: 3px solid var(--term-green);
-            background: rgba(0, 10, 0, 0.95);
-            box-shadow: 0 0 20px var(--term-green), inset 0 0 40px rgba(0, 255, 0, 0.2);
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            animation: boot-up 1s ease-out;
-        }
+    #vignette {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+        z-index: 998;
+        pointer-events: none;
+    }
 
-        @keyframes boot-up {
-            0% { transform: scale(0.1) skew(20deg); opacity: 0; }
-            50% { transform: scale(1.1) skew(-5deg); opacity: 1; }
-            100% { transform: scale(1) skew(0deg); opacity: 1; }
-        }
+    #screen-glow {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        box-shadow: inset 0 0 100px rgba(0, 255, 65, 0.1);
+        z-index: 997;
+        pointer-events: none;
+    }
 
-        /* HEADER SECTION */
-        header {
-            border-bottom: 2px solid var(--term-green);
-            padding-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-        }
+    @keyframes scanlines {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 4px; }
+    }
 
-        /* GAMEPLAY AREA */
-        #game-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+    /* ==========================================================================
+       SECTION 3: LAYOUT & CONTAINERS
+       ========================================================================== */
+    #terminal-wrapper {
+        width: 1000px;
+        height: 700px;
+        border: 2px solid var(--primary);
+        background-color: rgba(0, 10, 0, 0.95);
+        box-shadow: 
+            0 0 20px var(--primary),
+            inset 0 0 30px var(--secondary);
+        display: grid;
+        grid-template-rows: 60px 1fr 150px 30px;
+        position: relative;
+        z-index: 10;
+        transform: perspective(1000px) rotateX(2deg);
+        transition: transform 0.1s, filter 0.1s;
+    }
 
-        h1#question-display {
-            font-size: 2rem;
-            text-align: center;
-            margin-bottom: 50px;
-            text-shadow: 2px 2px var(--term-red);
-            max-width: 80%;
-            line-height: 1.4;
-        }
+    /* Header */
+    header {
+        border-bottom: 2px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        background: var(--secondary);
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
 
-        /* BUTTONS OF DOOM */
-        .btn-container {
-            display: flex;
-            gap: 40px;
-            position: relative;
-            width: 100%;
-            justify-content: center;
-            height: 80px; /* Space for movement */
-        }
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: var(--primary);
+        border-radius: 50%;
+        margin-right: 10px;
+        animation: blink 1s infinite;
+    }
 
-        button.cyber-btn {
-            background: transparent;
-            color: var(--term-green);
-            border: 2px solid var(--term-green);
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            font-family: var(--font-main);
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: 0.1s;
-            position: relative;
-            z-index: 20;
-            overflow: hidden;
-        }
+    /* Main Game Area */
+    #viewport {
+        position: relative;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
 
-        button.cyber-btn:hover {
-            background: var(--term-green);
-            color: black;
-            box-shadow: 0 0 15px var(--term-green);
-        }
+    /* Log Console */
+    #console-log {
+        border-top: 2px solid var(--primary);
+        background: #000;
+        padding: 10px;
+        font-size: 12px;
+        overflow-y: scroll;
+        color: #888;
+        font-family: 'Courier New', monospace;
+    }
+    
+    #console-log::-webkit-scrollbar { display: none; }
+    .log-line { margin-bottom: 2px; }
+    .log-err { color: var(--alert); }
+    .log-sys { color: var(--primary); }
+    .log-warn { color: var(--warning); }
 
-        button.cyber-btn:active {
-            transform: scale(0.95);
-        }
+    /* Footer */
+    footer {
+        background: var(--secondary);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        font-size: 10px;
+        text-transform: uppercase;
+    }
 
-        /* FAKE CHAT SIDEBAR */
-        #chat-log {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 250px;
-            height: 150px;
-            border: 1px solid var(--term-green);
-            padding: 10px;
-            font-size: 0.7rem;
-            overflow-y: scroll;
-            opacity: 0.7;
-            display: none; /* Hidden until level 5 */
-        }
+    /* ==========================================================================
+       SECTION 4: GAME ELEMENTS (BUTTONS & TEXT)
+       ========================================================================== */
+    #question-text {
+        font-size: 2rem;
+        text-align: center;
+        margin-bottom: 60px;
+        text-transform: uppercase;
+        text-shadow: 2px 2px var(--alert);
+        max-width: 80%;
+        line-height: 1.4;
+    }
 
-        #chat-log::-webkit-scrollbar { display: none; }
-        .chat-msg { margin-bottom: 5px; }
-        .chat-user { color: cyan; font-weight: bold; }
-        .chat-sys { color: yellow; }
+    .btn-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        width: 80%;
+        height: 100px; /* Defined height for movement logic */
+        position: relative;
+    }
 
-        /* FAKE LOADING BAR */
-        #loading-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: black;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-        #load-bar-container {
-            width: 60%;
-            height: 30px;
-            border: 2px solid var(--term-green);
-            margin-top: 20px;
-        }
-        #load-bar-fill {
-            height: 100%;
-            background: var(--term-green);
-            width: 0%;
-        }
+    .cyber-btn {
+        background: transparent;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+        padding: 20px;
+        font-size: 1.5rem;
+        font-family: var(--font-stack);
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.1s;
+        position: relative;
+        overflow: hidden;
+        z-index: 20;
+    }
 
-        /* BSOD (BLUE SCREEN) */
-        #bsod {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #0000AA;
-            color: white;
-            font-family: 'Lucida Console', monospace;
-            z-index: 9999;
-            padding: 50px;
-            font-size: 20px;
-            display: none;
-            text-align: left;
-        }
+    .cyber-btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: var(--primary);
+        transition: left 0.3s;
+        z-index: -1;
+    }
 
-        /* GLITCH CLASSES */
-        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+    .cyber-btn:hover {
+        color: #000;
+        box-shadow: 0 0 15px var(--primary);
+    }
 
-        .flicker { animation: flicker 0.1s infinite; }
-        @keyframes flicker { 0% {opacity:1;} 50% {opacity:0.3;} 100% {opacity:1;} }
-    </style>
+    .cyber-btn:hover::before {
+        left: 0;
+    }
+
+    .cyber-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* ==========================================================================
+       SECTION 5: ANIMATIONS & GLITCHES
+       ========================================================================== */
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .glitch-text {
+        animation: glitch-skew 1s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-skew {
+        0% { transform: skew(0deg); }
+        20% { transform: skew(-10deg); }
+        40% { transform: skew(10deg); }
+        60% { transform: skew(-5deg); }
+        80% { transform: skew(5deg); }
+        100% { transform: skew(0deg); }
+    }
+
+    .shake-hard {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-4px, 0, 0) rotate(2deg); }
+        20%, 80% { transform: translate3d(8px, 0, 0) rotate(-2deg); }
+        30%, 50%, 70% { transform: translate3d(-12px, 0, 0) rotate(2deg); }
+        40%, 60% { transform: translate3d(12px, 0, 0) rotate(-2deg); }
+    }
+
+    #loading-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: #000;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loader-bar {
+        width: 300px;
+        height: 20px;
+        border: 2px solid var(--primary);
+        margin-top: 20px;
+        padding: 2px;
+    }
+
+    .loader-fill {
+        height: 100%;
+        background: var(--primary);
+        width: 0%;
+        transition: width 0.1s;
+    }
+
+    /* BSOD */
+    #bsod-screen {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: #0000AA;
+        color: #fff;
+        z-index: 99999;
+        font-family: 'Lucida Console', monospace;
+        padding: 100px;
+        font-size: 24px;
+    }
+
+    /* TROLL TYPES CSS */
+    .btn-invisible { opacity: 0.02; }
+    .btn-tiny { transform: scale(0.1); }
+    .btn-rotate { animation: spin 2s infinite linear; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+</style>
 </head>
 <body>
 
-    <div id="audio-context-trigger" style="display:none;"></div>
+<div id="audio-bridge"></div>
 
-    <canvas id="matrix-canvas"></canvas>
+<canvas id="matrix-bg"></canvas>
 
-    <div id="bsod" onclick="location.reload()">
-        <p>A problem has been detected and your brain has been shut down to prevent damage to this computer.</p>
-        <p>ERROR_CODE: IQ_NOT_FOUND_EXCEPTION</p>
-        <p>If this is the first time you've seen this stop error screen, try reading a book.</p>
-        <br>
-        <p>Technical Information:</p>
-        <p>*** STOP: 0x00000000 (0xBAD, 0xUSER, 0xFAIL, 0xLOL)</p>
-        <br>
-        <p>Press any key to admit defeat...</p>
-    </div>
+<div id="crt-layer"></div>
+<div id="vignette"></div>
+<div id="screen-glow"></div>
 
-    <div id="main-terminal">
-        <header>
-            <span>USER: <span id="user-ip">FETCHING...</span></span>
-            <span>OS: ROBLOX_STUDIO_OS_V9</span>
-            <span>TIME: <span id="clock">00:00:00</span></span>
-        </header>
+<div id="bsod-screen" onclick="location.reload()">
+    <p>A fatal exception 0E has occurred at 0028:C0034B23 in VXD VMM(01) + 000034B23.</p>
+    <p>The current application "YOUR_BRAIN.EXE" will be terminated.</p>
+    <p> * Press any key to terminate the current application.</p>
+    <p> * Press CTRL+ALT+DEL again to restart your computer. You will lose any unsaved information in all applications.</p>
+    <br>
+    <p>Press any key to continue _</p>
+</div>
 
-        <div id="game-area">
-            <div id="loading-overlay">
-                <h2 class="flicker">DOWNLOADING VIRUS.EXE...</h2>
-                <div id="load-bar-container"><div id="load-bar-fill"></div></div>
-                <p id="load-text">ESTIMATED TIME: 2 HOURS</p>
-                <button onclick="skipLoad()" style="margin-top:20px; background:transparent; border:1px solid #0f0; color:#0f0; cursor:pointer;">SKIP (RECOMMENDED)</button>
-            </div>
+<div id="terminal-wrapper">
+    <header>
+        <div style="display:flex; align-items:center;">
+            <span class="status-indicator"></span>
+            <span>LCTFD :: INTERNAL AFFAIRS ARCHIVE</span>
+        </div>
+        <div>
+            ID: <span id="user-id">FETCHING...</span>
+        </div>
+        <div>
+            [SECURE CONNECTION]
+        </div>
+    </header>
 
-            <div id="quiz-content" style="display:none; width: 100%; text-align: center;">
-                <h1 id="question-display">INITIATING...</h1>
-                <div class="btn-container" id="btn-zone">
-                    </div>
-            </div>
+    <div id="viewport">
+        <div id="loading-overlay">
+            <h1 class="glitch-text">INITIALIZING PROTOCOL 3105</h1>
+            <div class="loader-bar"><div class="loader-fill" id="boot-bar"></div></div>
+            <p id="boot-text">LOADING ASSETS...</p>
         </div>
 
-        <div id="chat-log">
-            <div class="chat-msg"><span class="chat-sys">[SYSTEM]</span> Connected to DarkWeb Relay...</div>
-        </div>
+        <div id="game-ui" style="display:none; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div style="position: absolute; top: 10px; right: 20px; color: var(--dim);">
+                LEVEL: <span id="level-indicator">0</span>/44
+            </div>
+            
+            <h1 id="question-text">SYSTEM READY</h1>
+            
+            <div class="btn-container" id="interaction-zone">
+                </div>
 
-        <footer style="margin-top: auto; border-top: 1px solid #333; padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.6rem; color: #666;">
-            <span>MEMORY USAGE: 140% (LEAKING)</span>
-            <span>SESSION ID: <span id="session-id">NULL</span></span>
-        </footer>
+            <div id="feedback-msg" style="height: 20px; margin-top: 20px; color: var(--alert); font-weight: bold;"></div>
+        </div>
     </div>
+
+    <div id="console-log">
+        <div class="log-line log-sys">> SYSTEM BOOT SEQUENCE INITIATED...</div>
+        <div class="log-line log-sys">> CHECKING MEMORY INTEGRITY... OK</div>
+        <div class="log-line log-warn">> DETECTED UNAUTHORIZED USER "MOON"</div>
+        <div class="log-line log-sys">> LOADING TROLL_ENGINE_V9.JS...</div>
+    </div>
+
+    <footer>
+        <span>MEM: 64MB / 1024TB</span>
+        <span>CPU: MELTING</span>
+        <span>LOC: EASTVALE_CA</span>
+    </footer>
+</div>
 
 <script>
-    /* ==========================================================================
-       SECTOR 2: AUDIO SYNTHESIS ENGINE (NO EXTERNAL ASSETS)
-       ========================================================================== */
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
+/**
+ * ============================================================================
+ * CORE SYSTEM LOGIC (LEVEL 99 OBFUSCATION)
+ * ============================================================================
+ */
 
-    const sounds = {
-        boot: () => playTone(150, 'square', 0.5, 0.1),
-        hover: () => playTone(800, 'sine', 0.05, 0.05),
-        click: () => playTone(1200, 'triangle', 0.1, 0.1),
-        error: () => { playTone(100, 'sawtooth', 0.3, 0.5); playTone(80, 'sawtooth', 0.3, 0.5); },
-        win: () => { playTone(440, 'sine', 0.1, 1); playTone(880, 'sine', 0.1, 1); },
-        glitch: () => playTone(Math.random() * 2000, 'sawtooth', 0.1, 0.1)
-    };
+// --- CONFIGURATION ---
+const SYSTEM_CONFIG = {
+    totalLevels: 44,
+    punishmentFactor: 2, // Levels to go back on fail
+    trollIntensity: 1.0,
+    audioEnabled: true
+};
 
-    function playTone(freq, type, vol, dur) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + dur);
-    }
+// --- AUDIO SYNTHESIZER ---
+// Generates sounds mathematically so no files are needed
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
 
-    /* ==========================================================================
-       SECTOR 3: MATRIX RAIN BACKGROUND
-       ========================================================================== */
-    const canvas = document.getElementById('matrix-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const chars = "01WTF404LOLNOOB";
-    const drops = Array(Math.floor(canvas.width / 15)).fill(1);
+const SFX = {
+    boot: () => playOsc(100, 'square', 0.5, 0.2),
+    blip: () => playOsc(1200, 'sine', 0.05, 0.05),
+    select: () => playOsc(600, 'triangle', 0.1, 0.1),
+    error: () => { 
+        playOsc(150, 'sawtooth', 0.2, 0.1); 
+        setTimeout(() => playOsc(100, 'sawtooth', 0.2, 0.3), 100);
+    },
+    success: () => {
+        playOsc(440, 'sine', 0.1, 0.1);
+        setTimeout(() => playOsc(880, 'sine', 0.1, 0.2), 100);
+    },
+    hover: () => playOsc(50, 'square', 0.02, 0.02) // Deep hum
+};
 
-    function drawMatrix() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#0F0";
-        ctx.font = "15px monospace";
-        drops.forEach((y, i) => {
-            const text = chars[Math.floor(Math.random() * chars.length)];
-            ctx.fillText(text, i * 15, y * 15);
-            if (y * 15 > canvas.height && Math.random() > 0.98) drops[i] = 0;
-            drops[i]++;
-        });
-        requestAnimationFrame(drawMatrix);
-    }
-    drawMatrix();
+function playOsc(freq, type, vol, dur) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur);
+}
 
-    /* ==========================================================================
-       SECTOR 4: CHAT SIMULATOR & CLOCK
-       ========================================================================== */
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString();
-    }, 1000);
+// --- MATRIX RAIN ENGINE ---
+const cvs = document.getElementById('matrix-bg');
+const ctx = cvs.getContext('2d');
+cvs.width = window.innerWidth;
+cvs.height = window.innerHeight;
+const charset = "01アイウエオカキクケコサシスセソ3105LCTFD";
+const cols = Math.floor(cvs.width / 20);
+const drops = Array(cols).fill(1);
 
-    const trolls = ["Hacker420", "UrMom", "Admin", "System", "Bot_v9"];
-    const insults = [
-        "Is he seriously stuck on level 3?",
-        "Lol look at his mouse movement.",
-        "Deploying ransomware...",
-        "I bet he clicks the wrong one.",
-        "IP Address Trace: 99% complete",
-        "Uploading browsing history to Twitter...",
-        "Why is he so slow?"
-    ];
-
-    function addChat() {
-        const chat = document.getElementById('chat-log');
-        const user = trolls[Math.floor(Math.random() * trolls.length)];
-        const msg = insults[Math.floor(Math.random() * insults.length)];
-        const div = document.createElement('div');
-        div.className = 'chat-msg';
-        div.innerHTML = `<span class="chat-user">[${user}]</span> ${msg}`;
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    }
-    setInterval(() => { if(level > 2) addChat(); }, 4000);
-
-    /* ==========================================================================
-       SECTOR 5: GAME LOGIC & DATABASE
-       ========================================================================== */
-    let level = 0;
-    let fails = 0;
-    const db = [
-        { q: "Are you ready to suffer?", a: "Yes", b: "No", good: "Yes", type: "normal" },
-        { q: "Is water wet?", a: "Yes", b: "No", good: "No", type: "normal" },
-        { q: "Click 'Blue'", a: "Blue", b: "Red", good: "Blue", type: "swap_color" },
-        { q: "Are you smart?", a: "YES", b: "NO", good: "NO", type: "runaway" },
-        { q: "Quick! Math! 2 + 2 = ?", a: "4", b: "Fish", good: "Fish", type: "normal" },
-        { q: "Do not click the button.", a: "CLICK ME", b: "OK", good: "OK", type: "wait" },
-        { q: "Where is the answer?", a: "Here", b: "There", good: "There", type: "invisible" },
-        { q: "Is this a good website?", a: "Yes", b: "No", good: "Yes", type: "hover_swap" },
-        { q: "Select 'Left'", a: "Right", b: "Left", good: "b", type: "position_swap" }, // Trick: label vs position
-        { q: "Confirm purchase of 'WinRAR'?", a: "Buy ($0)", b: "Cancel", good: "Buy ($0)", type: "normal" },
-        { q: "Are you a robot?", a: "Beep Boop", b: "No", good: "Beep Boop", type: "normal" },
-        { q: "Click the GREEN button", a: "GREEN", b: "GREEN", good: "a", type: "all_red" },
-        { q: "Is the sky blue?", a: "Sometimes", b: "Never", good: "Sometimes", type: "normal" },
-        { q: "Stop breathing.", a: "OK", b: "Refuse", good: "Refuse", type: "normal" },
-        { q: "Is the answer A or B?", a: "C", b: "D", good: "a", type: "normal" },
-        { q: "Click the button that isn't lying.", a: "I am true", b: "I am false", good: "a", type: "liar_paradox" },
-        { q: "Level 17: Give up?", a: "Yes", b: "Never", good: "Never", type: "shake" },
-        { q: "If A=B and B=C, is A=C?", a: "Yes", b: "Banana", good: "Banana", type: "normal" },
-        { q: "Click 'Submit'", a: "Sub mit", b: "Submit", good: "Sub mit", type: "typo" },
-        { q: "Are you winning?", a: "Yes", b: "No", good: "No", type: "normal" },
-        { q: "System Override?", a: "Confirm", b: "Deny", good: "Confirm", type: "popup_hell" },
-        // ... Logic repeats or expands here. We keep it to 20 unique structured levels for code stability 
-        // but loop them with higher difficulty if needed.
-        { q: "FINAL BOSS: DELETE SYSTEM32?", a: "YES", b: "YES", good: "YES", type: "bsod" }
-    ];
-
-    // FAKE IP GENERATOR
-    document.getElementById('user-ip').innerText = `192.168.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
-    document.getElementById('session-id').innerText = Math.random().toString(36).substring(7).toUpperCase();
-
-    // STARTUP SEQUENCE
-    let loadProgress = 0;
-    function loadLoop() {
-        if(loadProgress < 100) {
-            loadProgress += Math.random() * 2;
-            document.getElementById('load-bar-fill').style.width = loadProgress + "%";
-            requestAnimationFrame(loadLoop);
-        }
-    }
-    loadLoop(); // Starts slow loading
-
-    function skipLoad() {
-        document.getElementById('loading-overlay').style.display = 'none';
-        document.getElementById('quiz-content').style.display = 'block';
-        document.getElementById('chat-log').style.display = 'block';
-        sounds.boot();
-        renderLevel();
-    }
-
-    // MAIN RENDERER
-    function renderLevel() {
-        if (level >= db.length) {
-            // Victory? No, loop back or BSOD
-            triggerBSOD();
-            return;
-        }
-
-        const data = db[level];
-        const display = document.getElementById('question-display');
-        const zone = document.getElementById('btn-zone');
-        
-        display.innerText = `LEVEL ${level + 1}: ${data.q}`;
-        zone.innerHTML = ''; // Clear buttons
-
-        const btn1 = document.createElement('button');
-        const btn2 = document.createElement('button');
-
-        btn1.className = 'cyber-btn';
-        btn2.className = 'cyber-btn';
-        
-        btn1.innerText = data.a;
-        btn2.innerText = data.b;
-
-        // Determine correct button logic
-        // We attach click listeners that check against 'good' value
-        // BUT, some levels swap text/values visually
-        
-        btn1.onclick = () => check(btn1.innerText, data.good, data.type);
-        btn2.onclick = () => check(btn2.innerText, data.good, data.type);
-
-        // APPLY SPECIAL TYPES
-        applyTrollEffects(data.type, btn1, btn2);
-
-        // Randomize order unless specific type
-        if (Math.random() > 0.5 && data.type !== 'position_swap') {
-            zone.appendChild(btn2);
-            zone.appendChild(btn1);
-        } else {
-            zone.appendChild(btn1);
-            zone.appendChild(btn2);
-        }
-    }
-
-    function applyTrollEffects(type, b1, b2) {
-        if (type === 'swap_color') {
-            b1.style.color = 'red'; b1.style.borderColor = 'red';
-            b2.style.color = 'cyan'; b2.style.borderColor = 'cyan';
-        }
-        if (type === 'runaway') {
-            // Make the WRONG one run away? No, make the RIGHT one run away.
-            // In level 4, good is "NO".
-            const targetText = db[level].good;
-            const targetBtn = b1.innerText === targetText ? b1 : b2;
-            targetBtn.onmouseover = function() {
-                sounds.hover();
-                const x = (Math.random() * 400) - 200;
-                const y = (Math.random() * 400) - 200;
-                this.style.transform = `translate(${x}px, ${y}px)`;
-            };
-        }
-        if (type === 'invisible') {
-            // One button is opacity 0.05
-            const targetText = db[level].good;
-            const targetBtn = b1.innerText === targetText ? b1 : b2;
-            targetBtn.style.opacity = '0.04';
-        }
-        if (type === 'hover_swap') {
-            b1.onmouseover = () => {
-                const temp = b1.innerText; b1.innerText = b2.innerText; b2.innerText = temp;
-                sounds.glitch();
-            };
-        }
-        if (type === 'wait') {
-            // Disable both for 3 seconds
-            b1.disabled = true; b2.disabled = true;
-            b1.style.opacity = 0.5; b2.style.opacity = 0.5;
-            setTimeout(() => {
-                b1.disabled = false; b2.disabled = false;
-                b1.style.opacity = 1; b2.style.opacity = 1;
-                sounds.boot(); // Alert sound
-            }, 3000);
-        }
-        if (type === 'all_red') {
-            b1.style.background = 'red'; b1.style.color = 'white';
-            b2.style.background = 'red'; b2.style.color = 'white';
-        }
-        if (type === 'shake') {
-            document.getElementById('main-terminal').classList.add('shake');
-        }
-    }
-
-    function check(text, good, type) {
-        if (type === 'bsod') {
-            triggerBSOD();
-            return;
-        }
-
-        // Special check for position swap logic where text doesn't match logic ID
-        let isCorrect = (text === good);
-        
-        // Manual overrides for tricky logic
-        if (type === 'position_swap') {
-            // In this level, good is 'b' (the second option logic), not the text
-            // But since we passed text, this is tricky.
-            // Let's simplify: If they click the button that looks like the answer, they fail.
-            // Actually, Level 9 says "Select Left". Good is "b" which is "Left".
-            // But visually, we might have swapped them.
-            // Let's just trust the text match for now to keep code working.
-            isCorrect = (text === good);
-        }
-
-        if (isCorrect) {
-            sounds.click();
-            level++;
-            renderLevel();
-        } else {
-            failSequence();
-        }
-    }
-
-    function failSequence() {
-        sounds.error();
-        fails++;
-        const term = document.getElementById('main-terminal');
-        term.classList.add('shake');
-        document.body.style.background = '#300';
-        
-        // Punishment: Go back levels
-        level = Math.max(0, level - 2);
-        
-        const display = document.getElementById('question-display');
-        const oldText = display.innerText;
-        display.innerText = "ERROR: INCORRECT INPUT DETECTED";
-        display.style.color = "red";
-
-        setTimeout(() => {
-            term.classList.remove('shake');
-            document.body.style.background = '#050505';
-            display.style.color = "var(--term-green)";
-            renderLevel();
-        }, 800);
-    }
-
-    function triggerBSOD() {
-        document.getElementById('bsod').style.display = 'block';
-        sounds.error();
-        // Play infinite loop of error sounds
-        setInterval(() => {
-            sounds.glitch();
-        }, 500);
-    }
-
-    // PREVENT CONTEXT MENU
-    window.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        alert("NICE TRY HACKER.");
+function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.fillStyle = "#0F0";
+    ctx.font = "14px monospace";
+    
+    drops.forEach((y, i) => {
+        const text = charset[Math.floor(Math.random() * charset.length)];
+        ctx.fillText(text, i * 20, y * 20);
+        if (y * 20 > cvs.height && Math.random() > 0.98) drops[i] = 0;
+        drops[i]++;
     });
+    requestAnimationFrame(drawMatrix);
+}
+drawMatrix();
+
+// --- LOGGING SYSTEM ---
+function log(msg, type = "sys") {
+    const consoleDiv = document.getElementById('console-log');
+    const div = document.createElement('div');
+    div.className = `log-line log-${type}`;
+    div.innerText = `> ${msg}`;
+    consoleDiv.appendChild(div);
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
+}
+
+// --- GAME DATA (THE TRAPS) ---
+/* STRUCTURE:
+   q: Question text
+   opts: Array of [ButtonText, IsCorrect(bool)]
+   type: Special troll effect identifier
+*/
+const LEVEL_DB = [
+    // 1
+    { q: "Are you ready to begin?", opts: [["Yes", false], ["No", true]], type: "swap_logic" }, 
+    // Trick: "No" is logically correct because the system hates you.
+    
+    // 2
+    { q: "Is water wet?", opts: [["Yes", false], ["No", true]], type: "std" },
+    
+    // 3
+    { q: "Click the BLUE button", opts: [["RED", false], ["BLUE", true]], type: "color_mismatch" },
+    
+    // 4
+    { q: "Are you intelligent?", opts: [["YES", false], ["NO", true]], type: "runaway" },
+    
+    // 5
+    { q: "Select Option 2", opts: [["Option 1", false], ["Option 2", true]], type: "std" },
+    
+    // 6
+    { q: "Wait for the signal...", opts: [["CLICK NOW", false], ["WAIT", true]], type: "timer_trap" },
+    
+    // 7
+    { q: "Click the smaller number", opts: [["50", false], ["10", true]], type: "size_invert" },
+    // Trick: 50 is visually smaller text size
+    
+    // 8
+    { q: "Is 3105 the future?", opts: [["Yes", true], ["No", false]], type: "std" },
+    
+    // 9
+    { q: "Click 'Right'", opts: [["Left", false], ["Right", true]], type: "pos_swap" },
+    
+    // 10
+    { q: "Don't panic.", opts: [["PANIC", false], ["OK", true]], type: "screen_shake" },
+    
+    // 11
+    { q: "Are you a developer?", opts: [["Yes", true], ["No", false]], type: "hover_swap" },
+    
+    // 12
+    { q: "Find the answer.", opts: [["Here", false], ["There", true]], type: "invisible" },
+    
+    // 13
+    { q: "2 + 2 = ?", opts: [["4", false], ["22", false], ["Fish", true]], type: "multi" }, 
+    // Note: handled by standard logic if we pass 3 opts
+    
+    // 14
+    { q: "Confirm Delete System32?", opts: [["Cancel", false], ["Confirm", true]], type: "popup_spam" },
+    
+    // 15
+    { q: "Is ice hot?", opts: [["Yes", false], ["No", true]], type: "std" },
+    
+    // 16
+    { q: "Click the GREEN button", opts: [["GREEN", true], ["GREEN", false]], type: "russian_roulette" },
+    // Both say green, one kills you.
+    
+    // 17
+    { q: "Are you winning?", opts: [["Yes", false], ["No", true]], type: "std" },
+    
+    // 18
+    { q: "Press the button", opts: [["Button", true], ["Button", false]], type: "spin" },
+    
+    // 19
+    { q: "Is this the end?", opts: [["Yes", false], ["No", true]], type: "std" },
+    
+    // 20
+    { q: "FINAL BOSS: ARE YOU SURE?", opts: [["YES", true], ["NO", false]], type: "bsod" }
+];
+
+// --- GAME STATE MANAGEMENT ---
+let currentState = {
+    level: 0,
+    fails: 0,
+    startTime: Date.now()
+};
+
+// GENERATE FAKE USER ID
+document.getElementById('user-id').innerText = "USR-" + Math.floor(Math.random() * 999999);
+
+// --- BOOT SEQUENCE ---
+let bootProgress = 0;
+function bootLoop() {
+    if (bootProgress < 100) {
+        bootProgress += Math.random() * 5;
+        document.getElementById('boot-bar').style.width = Math.min(bootProgress, 100) + "%";
+        
+        if (Math.random() > 0.8) {
+            log("Loading assets chunk " + Math.floor(bootProgress) + "...", "sys");
+            SFX.hover();
+        }
+        requestAnimationFrame(bootLoop);
+    } else {
+        setTimeout(startGame, 500);
+    }
+}
+bootLoop();
+
+function startGame() {
+    document.getElementById('loading-overlay').style.display = 'none';
+    document.getElementById('game-ui').style.display = 'flex'; // Changed to flex to fix layout
+    SFX.boot();
+    log("SESSION STARTED. GOOD LUCK.", "warn");
+    renderLevel();
+}
+
+// --- LEVEL RENDERER (FLAWLESS LOGIC) ---
+function renderLevel() {
+    // Check bounds
+    if (currentState.level >= LEVEL_DB.length) {
+        triggerBSOD();
+        return;
+    }
+
+    const data = LEVEL_DB[currentState.level];
+    const zone = document.getElementById('interaction-zone');
+    const msg = document.getElementById('feedback-msg');
+    
+    // Update UI
+    document.getElementById('question-text').innerText = data.q;
+    document.getElementById('level-indicator').innerText = currentState.level + 1;
+    msg.innerText = "";
+    zone.innerHTML = ""; // Clear previous buttons
+
+    // Apply Global Effects based on Type
+    handleGlobalEffects(data.type);
+
+    // Create Buttons
+    // data.opts is [[Text, IsCorrect], [Text, IsCorrect]]
+    // We shuffle them visually unless specific type prevents it
+    let options = [...data.opts];
+    if (data.type !== "pos_swap" && data.type !== "size_invert") {
+        options.sort(() => Math.random() - 0.5);
+    }
+
+    options.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'cyber-btn';
+        btn.innerText = opt[0];
+        
+        // --- THE FLAWLESS LOGIC FIX ---
+        // Instead of checking text later, we bind the boolean NOW.
+        // Closure captures 'opt[1]' which is true/false.
+        btn.onclick = (e) => handleInput(opt[1], e.target, data.type);
+        
+        // Add specific class hooks for troll logic
+        btn.dataset.isCorrect = opt[1]; // For hover logic to find it
+        
+        // Apply Button-Specific Troll CSS
+        applyButtonEffects(btn, data.type, opt[1]);
+
+        zone.appendChild(btn);
+    });
+}
+
+// --- EFFECT HANDLERS ---
+
+function handleGlobalEffects(type) {
+    const wrapper = document.getElementById('terminal-wrapper');
+    wrapper.style.transform = "perspective(1000px) rotateX(2deg)"; // Reset
+    
+    if (type === "screen_shake") {
+        wrapper.classList.add('shake-hard');
+        setTimeout(() => wrapper.classList.remove('shake-hard'), 1000);
+    }
+}
+
+function applyButtonEffects(btn, type, isCorrect) {
+    // Color Mismatch
+    if (type === "color_mismatch") {
+        // If text is RED, make it Blue style
+        if (btn.innerText === "RED") {
+            btn.style.color = "cyan";
+            btn.style.borderColor = "cyan";
+        } else {
+            btn.style.color = "red";
+            btn.style.borderColor = "red";
+        }
+    }
+
+    // Runaway (Only the correct button runs away)
+    if (type === "runaway" && isCorrect) {
+        btn.onmouseover = function() {
+            const x = (Math.random() * 300) - 150;
+            const y = (Math.random() * 200) - 100;
+            this.style.transform = `translate(${x}px, ${y}px)`;
+            SFX.hover();
+        };
+    }
+
+    // Timer Trap
+    if (type === "timer_trap" && isCorrect) {
+        btn.disabled = true;
+        btn.style.opacity = 0.3;
+        btn.innerText = "WAIT (3)";
+        let count = 3;
+        const interval = setInterval(() => {
+            count--;
+            btn.innerText = `WAIT (${count})`;
+            if (count <= 0) {
+                clearInterval(interval);
+                btn.innerText = "CLICK NOW";
+                btn.disabled = false;
+                btn.style.opacity = 1;
+                SFX.select();
+            }
+        }, 1000);
+    }
+
+    // Size Invert
+    if (type === "size_invert") {
+        if (btn.innerText === "50") btn.style.fontSize = "10px";
+        if (btn.innerText === "10") btn.style.fontSize = "40px";
+    }
+
+    // Hover Swap
+    if (type === "hover_swap") {
+        btn.onmouseenter = function() {
+            const btns = document.querySelectorAll('.cyber-btn');
+            // Swap texts
+            const temp = btns[0].innerText;
+            btns[0].innerText = btns[1].innerText;
+            btns[1].innerText = temp;
+            
+            // Note: The click handler is bound to the OBJECT, not the TEXT.
+            // So if you swap text, the logic stays with the physical button.
+            // This trolls them because they follow the text.
+        };
+    }
+
+    // Invisible
+    if (type === "invisible" && isCorrect) {
+        btn.classList.add('btn-invisible');
+    }
+
+    // Spin
+    if (type === "spin") {
+        btn.classList.add('btn-rotate');
+    }
+}
+
+// --- INPUT HANDLING ---
+
+function handleInput(isCorrect, btnElement, type) {
+    // TROLL OVERRIDES
+    if (type === "bsod") {
+        triggerBSOD();
+        return;
+    }
+
+    if (isCorrect) {
+        handleSuccess();
+    } else {
+        handleFail(type);
+    }
+}
+
+function handleSuccess() {
+    SFX.success();
+    currentState.level++;
+    log(`Level ${currentState.level} passed.`, "sys");
+    renderLevel();
+}
+
+function handleFail(type) {
+    SFX.error();
+    currentState.fails++;
+    
+    const wrapper = document.getElementById('terminal-wrapper');
+    wrapper.classList.add('shake-hard');
+    document.body.style.backgroundColor = "#200"; // Flash red
+    
+    const msg = document.getElementById('feedback-msg');
+    msg.innerText = "INCORRECT INPUT. REVERTING PROGRESS.";
+    
+    // Punishment: Go back
+    currentState.level = Math.max(0, currentState.level - SYSTEM_CONFIG.punishmentFactor);
+    log(`User failed. Reverting to Level ${currentState.level + 1}`, "err");
+
+    setTimeout(() => {
+        wrapper.classList.remove('shake-hard');
+        document.body.style.backgroundColor = "#050505";
+        renderLevel();
+    }, 800);
+}
+
+function triggerBSOD() {
+    SFX.error();
+    document.getElementById('bsod-screen').style.display = 'block';
+    log("CRITICAL SYSTEM FAILURE", "err");
+}
+
+// --- KEYBOARD SHORTCUTS (DEV CHEATS) ---
+document.addEventListener('keydown', (e) => {
+    // If user presses '`' (Tilde), skip level
+    if (e.key === '`') {
+        log("CHEAT DETECTED: SKIPPING LEVEL", "warn");
+        handleSuccess();
+    }
+});
+
+// --- INIT ---
+log("INITIALIZING...", "sys");
 
 </script>
 </body>
