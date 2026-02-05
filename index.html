@@ -2,757 +2,662 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LCTFD // ARCHIVE_3105 // ACCESS_DENIED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SYSTEM_OVERRIDE // LCTFD_ARCHIVE_3105</title>
 <style>
-    /* ==========================================================================
-       SECTION 1: CORE VISUALS & RESET
-       ========================================================================== */
+    /* ==============================================================================================
+       SECTION 1: GLOBAL RESET & VARIABLES
+       ============================================================================================== */
     :root {
-        --bg-color: #050505;
-        --primary: #00ff41;     /* Classic Matrix Green */
-        --secondary: #003b00;   /* Dark Green */
-        --alert: #ff0000;       /* Critical Red */
-        --warning: #ffcc00;     /* Amber */
-        --dim: #444;
-        --font-stack: 'Courier New', Courier, monospace;
-        --scan-line-color: rgba(0, 255, 65, 0.05);
-        --glass-reflection: rgba(255, 255, 255, 0.02);
+        --color-bg: #020202;
+        --color-term: #00ff41;     /* Classic Terminal Green */
+        --color-term-dim: #003b00; /* Dim Green */
+        --color-alert: #ff003c;    /* Cyberpunk Red */
+        --color-warn: #ffee00;     /* Warning Yellow */
+        --color-cyan: #00f3ff;     /* Cyber Cyan */
+        --font-mono: 'Courier New', Courier, monospace;
+        --scanline-speed: 8s;
+        --flicker-speed: 0.15s;
     }
 
     *, *::before, *::after {
         box-sizing: border-box;
-        user-select: none;
-        cursor: crosshair; /* Tactical Cursor */
-    }
-
-    html, body {
         margin: 0;
         padding: 0;
-        width: 100vw;
+        outline: none;
+        user-select: none;
+        -webkit-user-select: none;
+        cursor: crosshair;
+    }
+
+    body {
+        background-color: var(--color-bg);
+        color: var(--color-term);
+        font-family: var(--font-mono);
         height: 100vh;
-        background-color: var(--bg-color);
-        color: var(--primary);
-        font-family: var(--font-stack);
+        width: 100vw;
         overflow: hidden;
         display: flex;
-        align-items: center;
         justify-content: center;
-        font-size: 16px;
+        align-items: center;
+        perspective: 1000px;
     }
 
-    /* ==========================================================================
-       SECTION 2: CRT & SCREEN EFFECTS
-       ========================================================================== */
-    #crt-layer {
+    /* ==============================================================================================
+       SECTION 2: BACKGROUND FX LAYERS
+       ============================================================================================== */
+    #fx-layer-matrix {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.15;
+    }
+
+    #fx-layer-scanlines {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
         background: linear-gradient(
             to bottom,
-            rgba(18, 16, 16, 0) 50%,
-            rgba(0, 0, 0, 0.25) 50%
+            rgba(255,255,255,0),
+            rgba(255,255,255,0) 50%,
+            rgba(0,0,0,0.2) 50%,
+            rgba(0,0,0,0.2)
         );
         background-size: 100% 4px;
-        z-index: 999;
+        z-index: 100;
         pointer-events: none;
-        animation: scanlines 0.2s linear infinite;
+        animation: scanline-anim var(--scanline-speed) linear infinite;
     }
 
-    #vignette {
+    #fx-layer-vignette {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
-        z-index: 998;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle, transparent 60%, black 100%);
+        z-index: 99;
         pointer-events: none;
     }
 
-    #screen-glow {
+    #fx-layer-noise {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        box-shadow: inset 0 0 100px rgba(0, 255, 65, 0.1);
-        z-index: 997;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0.05;
+        z-index: 98;
         pointer-events: none;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNmKSIgb3BhY2l0eT0iMC41Ii8+PC9zdmc+');
     }
 
-    @keyframes scanlines {
+    @keyframes scanline-anim {
         0% { background-position: 0 0; }
-        100% { background-position: 0 4px; }
+        100% { background-position: 0 100%; }
     }
 
-    /* ==========================================================================
-       SECTION 3: LAYOUT & CONTAINERS
-       ========================================================================== */
-    #terminal-wrapper {
-        width: 1000px;
-        height: 700px;
-        border: 2px solid var(--primary);
-        background-color: rgba(0, 10, 0, 0.95);
-        box-shadow: 
-            0 0 20px var(--primary),
-            inset 0 0 30px var(--secondary);
-        display: grid;
-        grid-template-rows: 60px 1fr 150px 30px;
+    /* ==============================================================================================
+       SECTION 3: MAIN TERMINAL CONTAINER (RESPONSIVE)
+       ============================================================================================== */
+    #terminal-chassis {
         position: relative;
-        z-index: 10;
-        transform: perspective(1000px) rotateX(2deg);
-        transition: transform 0.1s, filter 0.1s;
+        z-index: 50;
+        width: 95vw;
+        max-width: 1200px;
+        height: 90vh;
+        max-height: 800px;
+        background: rgba(5, 10, 5, 0.95);
+        border: 2px solid var(--color-term);
+        box-shadow: 
+            0 0 20px var(--color-term),
+            inset 0 0 50px rgba(0, 50, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.1s;
+        /* Default subtle 3D rotation */
+        transform: rotateX(0.5deg) rotateY(0.5deg);
     }
 
-    /* Header */
-    header {
-        border-bottom: 2px solid var(--primary);
+    /* ==============================================================================================
+       SECTION 4: TERMINAL HEADER UI
+       ============================================================================================== */
+    .term-header {
+        height: 40px;
+        border-bottom: 2px solid var(--color-term);
+        background: var(--color-term-dim);
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 20px;
-        background: var(--secondary);
-        font-weight: bold;
-        letter-spacing: 2px;
+        padding: 0 15px;
+        font-size: 12px;
+        letter-spacing: 1px;
     }
 
-    .status-indicator {
-        display: inline-block;
+    .term-header-left, .term-header-right {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .status-light {
         width: 10px;
         height: 10px;
-        background: var(--primary);
+        background: var(--color-term);
         border-radius: 50%;
-        margin-right: 10px;
+        box-shadow: 0 0 5px var(--color-term);
         animation: blink 1s infinite;
     }
 
-    /* Main Game Area */
-    #viewport {
+    @keyframes blink { 50% { opacity: 0.3; } }
+
+    /* ==============================================================================================
+       SECTION 5: TERMINAL BODY (VIEWPORT)
+       ============================================================================================== */
+    .term-body {
+        flex: 1;
         position: relative;
-        padding: 40px;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
-    }
-
-    /* Log Console */
-    #console-log {
-        border-top: 2px solid var(--primary);
-        background: #000;
-        padding: 10px;
-        font-size: 12px;
-        overflow-y: scroll;
-        color: #888;
-        font-family: 'Courier New', monospace;
-    }
-    
-    #console-log::-webkit-scrollbar { display: none; }
-    .log-line { margin-bottom: 2px; }
-    .log-err { color: var(--alert); }
-    .log-sys { color: var(--primary); }
-    .log-warn { color: var(--warning); }
-
-    /* Footer */
-    footer {
-        background: var(--secondary);
-        color: var(--primary);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 10px;
-        font-size: 10px;
-        text-transform: uppercase;
-    }
-
-    /* ==========================================================================
-       SECTION 4: GAME ELEMENTS (BUTTONS & TEXT)
-       ========================================================================== */
-    #question-text {
-        font-size: 2rem;
-        text-align: center;
-        margin-bottom: 60px;
-        text-transform: uppercase;
-        text-shadow: 2px 2px var(--alert);
-        max-width: 80%;
-        line-height: 1.4;
-    }
-
-    .btn-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        width: 80%;
-        height: 100px; /* Defined height for movement logic */
-        position: relative;
-    }
-
-    .cyber-btn {
-        background: transparent;
-        color: var(--primary);
-        border: 2px solid var(--primary);
         padding: 20px;
-        font-size: 1.5rem;
-        font-family: var(--font-stack);
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: all 0.1s;
-        position: relative;
-        overflow: hidden;
-        z-index: 20;
     }
 
-    .cyber-btn::before {
-        content: '';
-        position: absolute;
-        top: 0; left: -100%;
-        width: 100%; height: 100%;
-        background: var(--primary);
-        transition: left 0.3s;
-        z-index: -1;
-    }
-
-    .cyber-btn:hover {
-        color: #000;
-        box-shadow: 0 0 15px var(--primary);
-    }
-
-    .cyber-btn:hover::before {
-        left: 0;
-    }
-
-    .cyber-btn:active {
-        transform: scale(0.95);
-    }
-
-    /* ==========================================================================
-       SECTION 5: ANIMATIONS & GLITCHES
-       ========================================================================== */
-    @keyframes blink { 50% { opacity: 0; } }
-
-    .glitch-text {
-        animation: glitch-skew 1s infinite linear alternate-reverse;
-    }
-
-    @keyframes glitch-skew {
-        0% { transform: skew(0deg); }
-        20% { transform: skew(-10deg); }
-        40% { transform: skew(10deg); }
-        60% { transform: skew(-5deg); }
-        80% { transform: skew(5deg); }
-        100% { transform: skew(0deg); }
-    }
-
-    .shake-hard {
-        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-    }
-
-    @keyframes shake {
-        10%, 90% { transform: translate3d(-4px, 0, 0) rotate(2deg); }
-        20%, 80% { transform: translate3d(8px, 0, 0) rotate(-2deg); }
-        30%, 50%, 70% { transform: translate3d(-12px, 0, 0) rotate(2deg); }
-        40%, 60% { transform: translate3d(12px, 0, 0) rotate(-2deg); }
-    }
-
-    #loading-overlay {
+    #loading-screen {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: #000;
-        z-index: 100;
+        background: var(--color-bg);
+        z-index: 500;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
     }
 
-    .loader-bar {
+    .loader-box {
         width: 300px;
         height: 20px;
-        border: 2px solid var(--primary);
-        margin-top: 20px;
+        border: 2px solid var(--color-term);
         padding: 2px;
+        margin-top: 10px;
     }
-
-    .loader-fill {
+    .loader-bar {
         height: 100%;
-        background: var(--primary);
+        background: var(--color-term);
         width: 0%;
-        transition: width 0.1s;
+        transition: width 0.05s linear;
     }
 
-    /* BSOD */
-    #bsod-screen {
+    /* ==============================================================================================
+       SECTION 6: GAME ELEMENTS
+       ============================================================================================== */
+    .level-indicator {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 14px;
+        color: #444;
+    }
+
+    #question-display {
+        font-size: clamp(20px, 4vw, 36px);
+        text-align: center;
+        margin-bottom: 50px;
+        text-transform: uppercase;
+        max-width: 800px;
+        line-height: 1.4;
+        text-shadow: 2px 2px var(--color-alert);
+        min-height: 80px; /* Prevent layout shift */
+    }
+
+    .btn-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        max-width: 800px;
+        position: relative;
+        min-height: 150px; /* Space for moving buttons */
+    }
+
+    .cy-btn {
+        position: relative;
+        background: transparent;
+        color: var(--color-term);
+        border: 2px solid var(--color-term);
+        padding: 20px 40px;
+        font-family: var(--font-mono);
+        font-size: 18px;
+        text-transform: uppercase;
+        font-weight: bold;
+        transition: all 0.1s;
+        z-index: 10;
+        min-width: 200px;
+        text-align: center;
+    }
+
+    .cy-btn::before {
+        content: '';
+        position: absolute;
+        top: 2px; left: 2px; right: 2px; bottom: 2px;
+        background: var(--color-term);
+        opacity: 0;
+        z-index: -1;
+        transition: opacity 0.1s;
+    }
+
+    .cy-btn:hover {
+        color: #000;
+        box-shadow: 0 0 20px var(--color-term);
+    }
+    .cy-btn:hover::before { opacity: 1; }
+    .cy-btn:active { transform: scale(0.96); }
+
+    /* ==============================================================================================
+       SECTION 7: TROLL MODIFIER CLASSES
+       ============================================================================================== */
+    .mod-invisible { opacity: 0.03; cursor: none; }
+    .mod-tiny { transform: scale(0.2); }
+    .mod-spin { animation: spin 0.5s infinite linear; }
+    .mod-shake { animation: shake-btn 0.2s infinite; }
+    .mod-red-theme { color: var(--color-alert); border-color: var(--color-alert); }
+    .mod-red-theme:hover { background: var(--color-alert); color: black; box-shadow: 0 0 20px var(--color-alert); }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes shake-btn {
+        0% { transform: translate(0,0); }
+        25% { transform: translate(-2px, 2px); }
+        50% { transform: translate(2px, -2px); }
+        75% { transform: translate(-2px, -2px); }
+        100% { transform: translate(0,0); }
+    }
+
+    /* ==============================================================================================
+       SECTION 8: SYSTEM LOG CONSOLE (BOTTOM)
+       ============================================================================================== */
+    .term-footer {
+        height: 150px;
+        border-top: 2px solid var(--color-term);
+        background: #000;
+        padding: 10px;
+        font-size: 11px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Lucida Console', monospace;
+        color: #666;
+    }
+    
+    .term-footer::-webkit-scrollbar { width: 5px; background: #111; }
+    .term-footer::-webkit-scrollbar-thumb { background: var(--color-term); }
+
+    .log-entry { margin-bottom: 2px; }
+    .log-sys { color: #666; }
+    .log-warn { color: var(--color-warn); }
+    .log-err { color: var(--color-alert); }
+    .log-ok { color: var(--color-term); }
+
+    /* ==============================================================================================
+       SECTION 9: BSOD OVERLAY
+       ============================================================================================== */
+    #bsod-layer {
         display: none;
         position: fixed;
         top: 0; left: 0; width: 100vw; height: 100vh;
         background: #0000AA;
-        color: #fff;
-        z-index: 99999;
-        font-family: 'Lucida Console', monospace;
-        padding: 100px;
-        font-size: 24px;
+        color: white;
+        z-index: 9999;
+        font-family: 'Courier New', monospace;
+        padding: 50px;
+        font-size: 18px;
     }
-
-    /* TROLL TYPES CSS */
-    .btn-invisible { opacity: 0.02; }
-    .btn-tiny { transform: scale(0.1); }
-    .btn-rotate { animation: spin 2s infinite linear; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
 
 </style>
 </head>
 <body>
 
-<div id="audio-bridge"></div>
+<canvas id="fx-layer-matrix"></canvas>
+<div id="fx-layer-scanlines"></div>
+<div id="fx-layer-vignette"></div>
+<div id="fx-layer-noise"></div>
 
-<canvas id="matrix-bg"></canvas>
-
-<div id="crt-layer"></div>
-<div id="vignette"></div>
-<div id="screen-glow"></div>
-
-<div id="bsod-screen" onclick="location.reload()">
-    <p>A fatal exception 0E has occurred at 0028:C0034B23 in VXD VMM(01) + 000034B23.</p>
-    <p>The current application "YOUR_BRAIN.EXE" will be terminated.</p>
-    <p> * Press any key to terminate the current application.</p>
-    <p> * Press CTRL+ALT+DEL again to restart your computer. You will lose any unsaved information in all applications.</p>
+<div id="bsod-layer" onclick="location.reload()">
+    <p>*** STOP: 0x00000000 (0xF41L, 0xTR0LL, 0xB4D_USR, 0x3105)</p>
     <br>
-    <p>Press any key to continue _</p>
+    <p>A problem has been detected and the simulation has been shut down to prevent damage to the user's ego.</p>
+    <p>The problem seems to be caused by the following file: USER_COMPETENCE.DLL</p>
+    <br>
+    <p>PAGE_FAULT_IN_NONPAGED_AREA</p>
+    <br>
+    <p>If this is the first time you've seen this stop error screen, restart your brain.</p>
+    <p>If this screen appears again, follow these steps:</p>
+    <p>1. Admit defeat.</p>
+    <p>2. Touch grass.</p>
+    <br>
+    <p>Collecting data for crash dump... </p>
+    <p>Initializing disk for crash dump... </p>
+    <p>Physical memory dump complete.</p>
+    <br>
+    <p>_</p>
 </div>
 
-<div id="terminal-wrapper">
-    <header>
-        <div style="display:flex; align-items:center;">
-            <span class="status-indicator"></span>
-            <span>LCTFD :: INTERNAL AFFAIRS ARCHIVE</span>
+<div id="terminal-chassis">
+    <div class="term-header">
+        <div class="term-header-left">
+            <div class="status-light"></div>
+            <span>ARCHIVE_3105 // INTERNAL_AFFAIRS</span>
         </div>
-        <div>
-            ID: <span id="user-id">FETCHING...</span>
+        <div class="term-header-right">
+            <span>SECURE_MODE: ON</span>
+            <span>USER: <span id="user-display">GUEST</span></span>
         </div>
-        <div>
-            [SECURE CONNECTION]
-        </div>
-    </header>
+    </div>
 
-    <div id="viewport">
-        <div id="loading-overlay">
-            <h1 class="glitch-text">INITIALIZING PROTOCOL 3105</h1>
-            <div class="loader-bar"><div class="loader-fill" id="boot-bar"></div></div>
-            <p id="boot-text">LOADING ASSETS...</p>
+    <div class="term-body">
+        
+        <div id="loading-screen">
+            <h2 style="margin-bottom: 20px;">INITIALIZING PROTOCOLS...</h2>
+            <div class="loader-box"><div class="loader-bar" id="load-progress"></div></div>
+            <div id="load-text" style="margin-top: 10px; font-size: 12px; color: #666;">MOUNTING...</div>
         </div>
 
-        <div id="game-ui" style="display:none; width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <div style="position: absolute; top: 10px; right: 20px; color: var(--dim);">
-                LEVEL: <span id="level-indicator">0</span>/44
-            </div>
+        <div id="game-layer" style="display:none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center;">
+            <div class="level-indicator">LEVEL: <span id="lvl-num">0</span>/64</div>
             
-            <h1 id="question-text">SYSTEM READY</h1>
+            <div id="question-display">SYSTEM READY.</div>
             
-            <div class="btn-container" id="interaction-zone">
+            <div class="btn-grid" id="btn-area">
                 </div>
-
-            <div id="feedback-msg" style="height: 20px; margin-top: 20px; color: var(--alert); font-weight: bold;"></div>
+            
+            <div id="feedback-area" style="height: 30px; margin-top: 30px; color: var(--color-alert); font-weight: bold; text-align:center;"></div>
         </div>
+
     </div>
 
-    <div id="console-log">
-        <div class="log-line log-sys">> SYSTEM BOOT SEQUENCE INITIATED...</div>
-        <div class="log-line log-sys">> CHECKING MEMORY INTEGRITY... OK</div>
-        <div class="log-line log-warn">> DETECTED UNAUTHORIZED USER "MOON"</div>
-        <div class="log-line log-sys">> LOADING TROLL_ENGINE_V9.JS...</div>
+    <div class="term-footer" id="console-out">
+        <div class="log-entry log-sys">[KERNEL] Power On Self Test... OK</div>
+        <div class="log-entry log-sys">[KERNEL] Checking Memory (64TB)... OK</div>
+        <div class="log-entry log-sys">[KERNEL] Loading drivers...</div>
     </div>
-
-    <footer>
-        <span>MEM: 64MB / 1024TB</span>
-        <span>CPU: MELTING</span>
-        <span>LOC: EASTVALE_CA</span>
-    </footer>
 </div>
 
 <script>
 /**
- * ============================================================================
- * CORE SYSTEM LOGIC (LEVEL 99 OBFUSCATION)
- * ============================================================================
+ * ==============================================================================================
+ * SECTION 10: JAVASCRIPT CORE LOGIC
+ * ==============================================================================================
  */
 
-// --- CONFIGURATION ---
-const SYSTEM_CONFIG = {
-    totalLevels: 44,
-    punishmentFactor: 2, // Levels to go back on fail
-    trollIntensity: 1.0,
-    audioEnabled: true
-};
-
-// --- AUDIO SYNTHESIZER ---
-// Generates sounds mathematically so no files are needed
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-
-const SFX = {
-    boot: () => playOsc(100, 'square', 0.5, 0.2),
-    blip: () => playOsc(1200, 'sine', 0.05, 0.05),
-    select: () => playOsc(600, 'triangle', 0.1, 0.1),
-    error: () => { 
-        playOsc(150, 'sawtooth', 0.2, 0.1); 
-        setTimeout(() => playOsc(100, 'sawtooth', 0.2, 0.3), 100);
-    },
-    success: () => {
-        playOsc(440, 'sine', 0.1, 0.1);
-        setTimeout(() => playOsc(880, 'sine', 0.1, 0.2), 100);
-    },
-    hover: () => playOsc(50, 'square', 0.02, 0.02) // Deep hum
-};
-
-function playOsc(freq, type, vol, dur) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + dur);
+// --- UTILITIES ---
+const $ = (id) => document.getElementById(id);
+const log = (msg, type='sys') => {
+    const d = document.createElement('div');
+    d.className = `log-entry log-${type}`;
+    d.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    $('console-out').appendChild(d);
+    $('console-out').scrollTop = $('console-out').scrollHeight;
 }
 
-// --- MATRIX RAIN ENGINE ---
-const cvs = document.getElementById('matrix-bg');
+// --- AUDIO SYNTH (NO ASSETS) ---
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const actx = new AudioContext();
+
+const synth = {
+    tone: (freq, type, dur) => {
+        if(actx.state === 'suspended') actx.resume();
+        const o = actx.createOscillator();
+        const g = actx.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(freq, actx.currentTime);
+        g.gain.setValueAtTime(0.1, actx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+        o.connect(g);
+        g.connect(actx.destination);
+        o.start();
+        o.stop(actx.currentTime + dur);
+    },
+    boot: () => { synth.tone(100, 'square', 0.2); setTimeout(()=>synth.tone(200,'square',0.4), 200); },
+    click: () => synth.tone(800, 'triangle', 0.05),
+    error: () => { synth.tone(150, 'sawtooth', 0.3); setTimeout(()=>synth.tone(100,'sawtooth',0.3), 150); },
+    win: () => { synth.tone(440, 'sine', 0.1); setTimeout(()=>synth.tone(880,'sine',0.2), 100); },
+    hover: () => synth.tone(50, 'sawtooth', 0.05)
+};
+
+// --- MATRIX RAIN ---
+const cvs = $('fx-layer-matrix');
 const ctx = cvs.getContext('2d');
-cvs.width = window.innerWidth;
-cvs.height = window.innerHeight;
-const charset = "01アイウエオカキクケコサシスセソ3105LCTFD";
-const cols = Math.floor(cvs.width / 20);
-const drops = Array(cols).fill(1);
+let cols, drops;
+
+function initMatrix() {
+    cvs.width = window.innerWidth;
+    cvs.height = window.innerHeight;
+    cols = Math.floor(cvs.width / 20);
+    drops = Array(cols).fill(1);
+}
 
 function drawMatrix() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
     ctx.fillRect(0, 0, cvs.width, cvs.height);
-    ctx.fillStyle = "#0F0";
-    ctx.font = "14px monospace";
-    
+    ctx.fillStyle = "#0F0"; // Green
+    ctx.font = "15px monospace";
     drops.forEach((y, i) => {
-        const text = charset[Math.floor(Math.random() * charset.length)];
-        ctx.fillText(text, i * 20, y * 20);
+        const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+        ctx.fillText(char, i * 20, y * 20);
         if (y * 20 > cvs.height && Math.random() > 0.98) drops[i] = 0;
         drops[i]++;
     });
     requestAnimationFrame(drawMatrix);
 }
+window.onresize = initMatrix;
+initMatrix();
 drawMatrix();
 
-// --- LOGGING SYSTEM ---
-function log(msg, type = "sys") {
-    const consoleDiv = document.getElementById('console-log');
-    const div = document.createElement('div');
-    div.className = `log-line log-${type}`;
-    div.innerText = `> ${msg}`;
-    consoleDiv.appendChild(div);
-    consoleDiv.scrollTop = consoleDiv.scrollHeight;
-}
-
-// --- GAME DATA (THE TRAPS) ---
-/* STRUCTURE:
-   q: Question text
-   opts: Array of [ButtonText, IsCorrect(bool)]
-   type: Special troll effect identifier
+// --- GAME DATABASE (MASSIVE) ---
+/* FORMAT: 
+   q: Question
+   opts: Array of [Label, IsCorrect]
+   type: Troll Logic Identifier
 */
-const LEVEL_DB = [
-    // 1
-    { q: "Are you ready to begin?", opts: [["Yes", false], ["No", true]], type: "swap_logic" }, 
-    // Trick: "No" is logically correct because the system hates you.
-    
-    // 2
-    { q: "Is water wet?", opts: [["Yes", false], ["No", true]], type: "std" },
-    
-    // 3
-    { q: "Click the BLUE button", opts: [["RED", false], ["BLUE", true]], type: "color_mismatch" },
-    
-    // 4
-    { q: "Are you intelligent?", opts: [["YES", false], ["NO", true]], type: "runaway" },
-    
-    // 5
-    { q: "Select Option 2", opts: [["Option 1", false], ["Option 2", true]], type: "std" },
-    
-    // 6
-    { q: "Wait for the signal...", opts: [["CLICK NOW", false], ["WAIT", true]], type: "timer_trap" },
-    
-    // 7
-    { q: "Click the smaller number", opts: [["50", false], ["10", true]], type: "size_invert" },
-    // Trick: 50 is visually smaller text size
-    
-    // 8
-    { q: "Is 3105 the future?", opts: [["Yes", true], ["No", false]], type: "std" },
-    
-    // 9
-    { q: "Click 'Right'", opts: [["Left", false], ["Right", true]], type: "pos_swap" },
-    
-    // 10
-    { q: "Don't panic.", opts: [["PANIC", false], ["OK", true]], type: "screen_shake" },
-    
-    // 11
-    { q: "Are you a developer?", opts: [["Yes", true], ["No", false]], type: "hover_swap" },
-    
-    // 12
-    { q: "Find the answer.", opts: [["Here", false], ["There", true]], type: "invisible" },
-    
-    // 13
-    { q: "2 + 2 = ?", opts: [["4", false], ["22", false], ["Fish", true]], type: "multi" }, 
-    // Note: handled by standard logic if we pass 3 opts
-    
-    // 14
-    { q: "Confirm Delete System32?", opts: [["Cancel", false], ["Confirm", true]], type: "popup_spam" },
-    
-    // 15
-    { q: "Is ice hot?", opts: [["Yes", false], ["No", true]], type: "std" },
-    
-    // 16
-    { q: "Click the GREEN button", opts: [["GREEN", true], ["GREEN", false]], type: "russian_roulette" },
-    // Both say green, one kills you.
-    
-    // 17
-    { q: "Are you winning?", opts: [["Yes", false], ["No", true]], type: "std" },
-    
-    // 18
-    { q: "Press the button", opts: [["Button", true], ["Button", false]], type: "spin" },
-    
-    // 19
-    { q: "Is this the end?", opts: [["Yes", false], ["No", true]], type: "std" },
-    
-    // 20
-    { q: "FINAL BOSS: ARE YOU SURE?", opts: [["YES", true], ["NO", false]], type: "bsod" }
+const DB = [
+    { q: "INITIATE SEQUENCE?", opts: [["YES", false], ["NO", true]], type: "swap_logic" },
+    { q: "IS THE SKY GREEN?", opts: [["YES", false], ["NO", true]], type: "std" },
+    { q: "CLICK THE BLUE BUTTON", opts: [["RED", false], ["BLUE", true]], type: "color_mismatch" }, // Visuals swapped
+    { q: "ARE YOU A ROBOT?", opts: [["YES", false], ["NO", true]], type: "runaway" },
+    { q: "WAIT FOR IT...", opts: [["CLICK ME", false], ["WAIT", true]], type: "timer" },
+    { q: "FIND THE ANSWER", opts: [["HERE", false], ["THERE", true]], type: "invisible" },
+    { q: "2 + 2 = ?", opts: [["4", false], ["FISH", true]], type: "std" },
+    { q: "CLICK 'LEFT'", opts: [["LEFT", false], ["RIGHT", true]], type: "position_swap" },
+    { q: "IS FIRE HOT?", opts: [["YES", false], ["NO", true]], type: "std" },
+    { q: "DON'T PANIC", opts: [["PANIC", false], ["OK", true]], type: "shake_screen" },
+    { q: "SELECT THE SMALLEST", opts: [["50", false], ["10", true]], type: "size_mismatch" },
+    { q: "ARE YOU SMART?", opts: [["YES", false], ["NO", true]], type: "hover_swap" },
+    { q: "CONFIRM DELETION?", opts: [["CANCEL", false], ["CONFIRM", true]], type: "popup_spam" },
+    { q: "CLICK THE GREEN BUTTON", opts: [["GREEN", true], ["GREEN", false]], type: "roulette" },
+    { q: "IS ICE COLD?", opts: [["YES", true], ["NO", false]], type: "std" },
+    { q: "DO NOT CLICK", opts: [["OK", false], ["I REFUSE", true]], type: "std" },
+    { q: "SYSTEM OVERRIDE?", opts: [["YES", true], ["NO", false]], type: "red_theme" },
+    { q: "10 / 2 = ?", opts: [["5", true], ["20", false]], type: "spin_btns" },
+    { q: "SELECT OPTION A", opts: [["B", false], ["A", true]], type: "std" },
+    { q: "IS THIS A QUIZ?", opts: [["YES", false], ["NO", true]], type: "std" },
+    { q: "CLICK THE TOP BUTTON", opts: [["TOP", false], ["BOTTOM", true]], type: "position_swap" },
+    { q: "ARE YOU WINNING?", opts: [["YES", false], ["NO", true]], type: "runaway" },
+    { q: "PRESS START", opts: [["STOP", false], ["START", true]], type: "std" },
+    { q: "IS WATER WET?", opts: [["MAYBE", true], ["NO", false]], type: "std" },
+    { q: "CLICK 'RIGHT' AGAIN", opts: [["RIGHT", true], ["LEFT", false]], type: "position_swap" },
+    { q: "IGNORE THIS QUESTION", opts: [["OK", false], ["IGNORE", true]], type: "invisible" },
+    { q: "TOUCH GRASS?", opts: [["YES", true], ["NO", false]], type: "std" },
+    { q: "ARE YOU ADMIN?", opts: [["YES", false], ["NO", true]], type: "hover_swap" },
+    { q: "WHICH IS HEAVIER?", opts: [["1KG STEEL", false], ["1KG FEATHERS", true]], type: "std" }, // Troll physics
+    { q: "CLICK THE ODD ONE", opts: [["A", false], ["A", true]], type: "roulette" },
+    { q: "IS 3105 REAL?", opts: [["YES", true], ["NO", false]], type: "std" },
+    { q: "DELETE SYSTEM32?", opts: [["YES", true], ["NO", false]], type: "bsod" }
+    // ... Database repeats logic for 64 levels virtually
 ];
 
-// --- GAME STATE MANAGEMENT ---
-let currentState = {
-    level: 0,
-    fails: 0,
-    startTime: Date.now()
-};
+// --- GAME LOGIC ---
+let state = { lvl: 0, fails: 0 };
 
-// GENERATE FAKE USER ID
-document.getElementById('user-id').innerText = "USR-" + Math.floor(Math.random() * 999999);
-
-// --- BOOT SEQUENCE ---
-let bootProgress = 0;
-function bootLoop() {
-    if (bootProgress < 100) {
-        bootProgress += Math.random() * 5;
-        document.getElementById('boot-bar').style.width = Math.min(bootProgress, 100) + "%";
+function initGame() {
+    let p = 0;
+    const bar = $('load-progress');
+    const txt = $('load-text');
+    const logs = ["Loading Kernel...", "Parsing HTML...", "Hacking Mainframe...", "Injecting CSS...", "Allocating RAM...", "Decrypting...", "Linking Nodes...", "Optimizing Trolls...", "Starting..."];
+    
+    const int = setInterval(() => {
+        p += Math.random() * 5;
+        if(p > 100) p = 100;
+        bar.style.width = p + "%";
         
-        if (Math.random() > 0.8) {
-            log("Loading assets chunk " + Math.floor(bootProgress) + "...", "sys");
-            SFX.hover();
+        if(Math.random() > 0.7) {
+            txt.innerText = logs[Math.floor(Math.random()*logs.length)];
+            log(txt.innerText);
         }
-        requestAnimationFrame(bootLoop);
-    } else {
-        setTimeout(startGame, 500);
-    }
-}
-bootLoop();
 
-function startGame() {
-    document.getElementById('loading-overlay').style.display = 'none';
-    document.getElementById('game-ui').style.display = 'flex'; // Changed to flex to fix layout
-    SFX.boot();
-    log("SESSION STARTED. GOOD LUCK.", "warn");
-    renderLevel();
+        if(p === 100) {
+            clearInterval(int);
+            setTimeout(() => {
+                $('loading-screen').style.display = 'none';
+                $('game-layer').style.display = 'flex';
+                synth.boot();
+                renderLevel();
+            }, 500);
+        }
+    }, 50);
 }
 
-// --- LEVEL RENDERER (FLAWLESS LOGIC) ---
 function renderLevel() {
-    // Check bounds
-    if (currentState.level >= LEVEL_DB.length) {
+    // Virtual expansion of levels if DB runs out
+    const dbIndex = state.lvl % DB.length; 
+    const data = DB[dbIndex];
+    
+    // Check end condition
+    if(state.lvl >= 64) {
         triggerBSOD();
         return;
     }
 
-    const data = LEVEL_DB[currentState.level];
-    const zone = document.getElementById('interaction-zone');
-    const msg = document.getElementById('feedback-msg');
+    $('lvl-num').innerText = state.lvl + 1;
+    $('question-display').innerText = data.q;
+    $('feedback-area').innerText = "";
     
-    // Update UI
-    document.getElementById('question-text').innerText = data.q;
-    document.getElementById('level-indicator').innerText = currentState.level + 1;
-    msg.innerText = "";
-    zone.innerHTML = ""; // Clear previous buttons
+    const zone = $('btn-area');
+    zone.innerHTML = "";
 
-    // Apply Global Effects based on Type
-    handleGlobalEffects(data.type);
+    // Reset container styles
+    $('terminal-chassis').style.transform = "rotateX(0.5deg) rotateY(0.5deg)";
 
-    // Create Buttons
-    // data.opts is [[Text, IsCorrect], [Text, IsCorrect]]
-    // We shuffle them visually unless specific type prevents it
-    let options = [...data.opts];
-    if (data.type !== "pos_swap" && data.type !== "size_invert") {
-        options.sort(() => Math.random() - 0.5);
+    // Setup buttons
+    let opts = [...data.opts];
+    
+    // Don't shuffle if position matters
+    if(data.type !== 'position_swap' && data.type !== 'size_mismatch') {
+        opts.sort(() => Math.random() - 0.5);
     }
 
-    options.forEach((opt, index) => {
+    opts.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = 'cyber-btn';
+        btn.className = 'cy-btn';
         btn.innerText = opt[0];
+        const isCorrect = opt[1];
         
-        // --- THE FLAWLESS LOGIC FIX ---
-        // Instead of checking text later, we bind the boolean NOW.
-        // Closure captures 'opt[1]' which is true/false.
-        btn.onclick = (e) => handleInput(opt[1], e.target, data.type);
+        // Event Listener
+        btn.onclick = () => handleInput(isCorrect, btn, data.type);
         
-        // Add specific class hooks for troll logic
-        btn.dataset.isCorrect = opt[1]; // For hover logic to find it
+        // Apply Troll FX
+        applyFX(btn, data.type, isCorrect);
         
-        // Apply Button-Specific Troll CSS
-        applyButtonEffects(btn, data.type, opt[1]);
-
         zone.appendChild(btn);
     });
 }
 
-// --- EFFECT HANDLERS ---
-
-function handleGlobalEffects(type) {
-    const wrapper = document.getElementById('terminal-wrapper');
-    wrapper.style.transform = "perspective(1000px) rotateX(2deg)"; // Reset
+function applyFX(btn, type, isCorrect) {
+    if(type === 'color_mismatch') {
+        if(btn.innerText === "RED") { btn.style.color = "cyan"; btn.style.borderColor = "cyan"; }
+        else { btn.style.color = "#ff003c"; btn.style.borderColor = "#ff003c"; }
+    }
     
-    if (type === "screen_shake") {
-        wrapper.classList.add('shake-hard');
-        setTimeout(() => wrapper.classList.remove('shake-hard'), 1000);
-    }
-}
-
-function applyButtonEffects(btn, type, isCorrect) {
-    // Color Mismatch
-    if (type === "color_mismatch") {
-        // If text is RED, make it Blue style
-        if (btn.innerText === "RED") {
-            btn.style.color = "cyan";
-            btn.style.borderColor = "cyan";
-        } else {
-            btn.style.color = "red";
-            btn.style.borderColor = "red";
-        }
-    }
-
-    // Runaway (Only the correct button runs away)
-    if (type === "runaway" && isCorrect) {
-        btn.onmouseover = function() {
+    if(type === 'runaway' && isCorrect) {
+        btn.onmouseenter = function() {
             const x = (Math.random() * 300) - 150;
             const y = (Math.random() * 200) - 100;
             this.style.transform = `translate(${x}px, ${y}px)`;
-            SFX.hover();
-        };
+            synth.hover();
+        }
     }
-
-    // Timer Trap
-    if (type === "timer_trap" && isCorrect) {
+    
+    if(type === 'timer' && isCorrect) {
         btn.disabled = true;
         btn.style.opacity = 0.3;
-        btn.innerText = "WAIT (3)";
-        let count = 3;
-        const interval = setInterval(() => {
-            count--;
-            btn.innerText = `WAIT (${count})`;
-            if (count <= 0) {
-                clearInterval(interval);
-                btn.innerText = "CLICK NOW";
-                btn.disabled = false;
-                btn.style.opacity = 1;
-                SFX.select();
-            }
-        }, 1000);
+        btn.innerText = "WAIT...";
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.style.opacity = 1;
+            btn.innerText = "CLICK ME";
+            synth.boot();
+        }, 3000);
     }
-
-    // Size Invert
-    if (type === "size_invert") {
-        if (btn.innerText === "50") btn.style.fontSize = "10px";
-        if (btn.innerText === "10") btn.style.fontSize = "40px";
+    
+    if(type === 'size_mismatch') {
+        if(btn.innerText === "50") btn.style.fontSize = "12px";
+        if(btn.innerText === "10") btn.style.fontSize = "32px";
     }
-
-    // Hover Swap
-    if (type === "hover_swap") {
+    
+    if(type === 'hover_swap') {
         btn.onmouseenter = function() {
-            const btns = document.querySelectorAll('.cyber-btn');
-            // Swap texts
-            const temp = btns[0].innerText;
-            btns[0].innerText = btns[1].innerText;
-            btns[1].innerText = temp;
-            
-            // Note: The click handler is bound to the OBJECT, not the TEXT.
-            // So if you swap text, the logic stays with the physical button.
-            // This trolls them because they follow the text.
-        };
+            const all = document.querySelectorAll('.cy-btn');
+            if(all.length > 1) {
+                const tmp = all[0].innerText;
+                all[0].innerText = all[1].innerText;
+                all[1].innerText = tmp;
+            }
+        }
     }
-
-    // Invisible
-    if (type === "invisible" && isCorrect) {
-        btn.classList.add('btn-invisible');
+    
+    if(type === 'invisible' && isCorrect) {
+        btn.classList.add('mod-invisible');
     }
-
-    // Spin
-    if (type === "spin") {
-        btn.classList.add('btn-rotate');
+    
+    if(type === 'red_theme') {
+        btn.classList.add('mod-red-theme');
+    }
+    
+    if(type === 'spin_btns') {
+        btn.classList.add('mod-spin');
+    }
+    
+    if(type === 'shake_screen') {
+        $('terminal-chassis').classList.add('mod-shake');
     }
 }
 
-// --- INPUT HANDLING ---
-
-function handleInput(isCorrect, btnElement, type) {
-    // TROLL OVERRIDES
-    if (type === "bsod") {
-        triggerBSOD();
-        return;
-    }
-
-    if (isCorrect) {
-        handleSuccess();
-    } else {
-        handleFail(type);
-    }
-}
-
-function handleSuccess() {
-    SFX.success();
-    currentState.level++;
-    log(`Level ${currentState.level} passed.`, "sys");
-    renderLevel();
-}
-
-function handleFail(type) {
-    SFX.error();
-    currentState.fails++;
+function handleInput(correct, btn, type) {
+    if(type === 'bsod') { triggerBSOD(); return; }
     
-    const wrapper = document.getElementById('terminal-wrapper');
-    wrapper.classList.add('shake-hard');
-    document.body.style.backgroundColor = "#200"; // Flash red
-    
-    const msg = document.getElementById('feedback-msg');
-    msg.innerText = "INCORRECT INPUT. REVERTING PROGRESS.";
-    
-    // Punishment: Go back
-    currentState.level = Math.max(0, currentState.level - SYSTEM_CONFIG.punishmentFactor);
-    log(`User failed. Reverting to Level ${currentState.level + 1}`, "err");
-
-    setTimeout(() => {
-        wrapper.classList.remove('shake-hard');
-        document.body.style.backgroundColor = "#050505";
+    if(correct) {
+        synth.win();
+        state.lvl++;
+        log(`LEVEL ${state.lvl} PASSED.`, 'ok');
         renderLevel();
-    }, 800);
+    } else {
+        synth.error();
+        $('feedback-area').innerText = "ACCESS DENIED. REVERTING.";
+        $('terminal-chassis').classList.add('mod-shake');
+        
+        setTimeout(() => $('terminal-chassis').classList.remove('mod-shake'), 500);
+        
+        state.fails++;
+        state.lvl = Math.max(0, state.lvl - 2); // Punishment
+        log(`FAIL DETECTED. REVERTING...`, 'err');
+        
+        setTimeout(renderLevel, 800);
+    }
 }
 
 function triggerBSOD() {
-    SFX.error();
-    document.getElementById('bsod-screen').style.display = 'block';
-    log("CRITICAL SYSTEM FAILURE", "err");
+    $('bsod-layer').style.display = 'block';
+    synth.error();
+    setInterval(() => synth.error(), 1000); // Annoyance loop
 }
 
-// --- KEYBOARD SHORTCUTS (DEV CHEATS) ---
-document.addEventListener('keydown', (e) => {
-    // If user presses '`' (Tilde), skip level
-    if (e.key === '`') {
-        log("CHEAT DETECTED: SKIPPING LEVEL", "warn");
-        handleSuccess();
-    }
-});
-
-// --- INIT ---
-log("INITIALIZING...", "sys");
+// Start
+window.onload = initGame;
 
 </script>
 </body>
